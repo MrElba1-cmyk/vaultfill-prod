@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  VaultFill 2.0 — Strict Contrast Theme Map
+  Requirements:
+  - DARK: Slate-200 text on Slate-950 background
+  - LIGHT: Slate-900 text on Slate-50 background
+  - Light mode functional blue MUST be darker for WCAG AA on mobile (#1D4ED8)
+*/
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Functional accent */
+  --vault-blue: #60a5fa; /* light blue for dark mode */
+  --trust: #3b82f6;
+
+  /* DARK defaults */
+  --bg: #020617;      /* slate-950 */
+  --fg: #e2e8f0;      /* slate-200 */
+  --muted: #cbd5e1;   /* slate-300 */
+  --muted-2: #94a3b8; /* slate-400 */
+
+  --card: rgba(2, 6, 23, 0.72);
+  --card-2: rgba(15, 23, 42, 0.62);
+  --border: rgba(255, 255, 255, 0.10);
+
+  --shadow-natural: 0 18px 60px rgba(0, 0, 0, 0.45);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html { color-scheme: dark; }
+
+html.light {
+  color-scheme: light;
+
+  /* WCAG-friendly functional blue */
+  --vault-blue: #1d4ed8; /* blue-700 */
+
+  --bg: #f8fafc;      /* slate-50 */
+  --fg: #0f172a;      /* slate-900 */
+  --muted: #334155;   /* slate-700 */
+  --muted-2: #475569; /* slate-600 */
+
+  --card: rgba(255, 255, 255, 0.72);
+  --card-2: rgba(255, 255, 255, 0.88);
+  --border: rgba(2, 6, 23, 0.10);
+
+  --shadow-natural: 0 22px 70px rgba(2, 6, 23, 0.14);
 }
+
+html.dark { color-scheme: dark; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  line-height: 1.6; /* leading-relaxed */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optical weighting: slightly heavier in light mode */
+html.light body { font-weight: 500; }
+html.dark body { font-weight: 450; }
+
+/* Trust Blue gradient text utility */
+.text-gradient-blue {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bento cards — uniform padding/radius, stretchable height */
+.bento-card {
+  border-radius: 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  box-shadow: var(--shadow-natural);
+  padding: 2rem; /* p-8 */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.22);
+}
+
+.bento-kicker {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--vault-blue) 88%, transparent);
+}
+
+.bento-icon {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  width: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--vault-blue) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--vault-blue) 22%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--vault-blue) 18%, transparent);
+}
+
+/* "Vault Powering Up" micro-interaction */
+.vault-power {
+  position: absolute;
+  inset: -1px;
+  border-radius: 0.9rem;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  background:
+    radial-gradient(120px 60px at 30% 30%, rgba(255, 255, 255, 0.22), transparent 60%),
+    radial-gradient(140px 70px at 70% 70%, rgba(59, 130, 246, 0.35), transparent 62%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.group:hover .vault-power { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-card,
+  .vault-power {
+    transition: none;
+  }
+  .bento-card:hover { transform: none; }
 }
