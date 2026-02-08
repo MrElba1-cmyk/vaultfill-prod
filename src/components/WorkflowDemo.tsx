@@ -194,7 +194,7 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
         <div className="w-full flex-1 lg:min-h-[500px]">
           <div 
             className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 backdrop-blur-sm sm:rounded-3xl sm:p-8"
-            style={{ minHeight: '480px' }}
+            style={{ minHeight: '560px' }}
           >
             {/* Playback Controls */}
             <div className="absolute right-3 top-3 z-10 flex items-center gap-2 sm:right-6 sm:top-6">
@@ -211,7 +211,7 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
             </div>
 
             {/* Step Content — crossfade with fixed dimensions */}
-            <div className="relative" style={{ minHeight: '340px' }}>
+            <div className="relative" style={{ height: '420px' }}>
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.div
                   key={activeStep}
@@ -219,12 +219,13 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
                   animate={{ opacity: 1, filter: 'blur(0px)' }}
                   exit={{ opacity: 0, filter: 'blur(4px)', position: 'absolute', top: 0, left: 0, right: 0 }}
                   className="will-change-[opacity,filter]"
+                  style={{ height: '420px', overflow: 'hidden' }}
                   transition={{ 
                     duration: shouldReduceMotion ? 0.05 : 0.6,
                     ease: [0.4, 0, 0.2, 1]
                   }}
                 >
-                  <div style={{ minHeight: '340px' }}>
+                  <div style={{ height: '420px', overflow: 'hidden' }}>
                     {activeStep === 0 && <IngestVisualization progress={documentProgress} />}
                     {activeStep === 1 && <GenerateVisualization 
                       showThinking={showAIThinking} 
@@ -275,7 +276,7 @@ function IngestVisualization({ progress }: { progress: number }) {
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex h-full flex-col gap-5" style={{ height: '420px' }}>
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
           📁
@@ -344,7 +345,7 @@ function GenerateVisualization({ showThinking, confidence }: { showThinking: boo
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" style={{ height: '420px' }}>
       <div className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3">
         <div className="mb-2 flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-orange-400"></div>
@@ -426,7 +427,7 @@ function ExportVisualization() {
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" style={{ height: '420px' }}>
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
           ⚡
