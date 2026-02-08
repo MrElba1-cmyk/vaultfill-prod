@@ -60,7 +60,7 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
 
     const timer = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % workflowSteps.length);
-    }, 4000);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [isPlaying]);
@@ -68,7 +68,6 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
   // Step-specific animations
   useEffect(() => {
     if (activeStep === 0) {
-      // Simulate document processing
       setDocumentProgress(0);
       const progressTimer = setInterval(() => {
         setDocumentProgress((prev) => {
@@ -76,12 +75,11 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
             clearInterval(progressTimer);
             return 100;
           }
-          return prev + Math.random() * 15;
+          return prev + Math.random() * 12;
         });
-      }, 200);
+      }, 250);
       return () => clearInterval(progressTimer);
     } else if (activeStep === 1) {
-      // Simulate AI thinking process
       setShowAIThinking(true);
       setConfidence(0);
       const thinkingTimer = setTimeout(() => {
@@ -96,7 +94,7 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
           });
         }, 100);
         return () => clearInterval(confidenceTimer);
-      }, 1500);
+      }, 1800);
       return () => clearTimeout(thinkingTimer);
     }
   }, [activeStep]);
@@ -110,29 +108,14 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
     setIsPlaying((prev) => !prev);
   }, []);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
   };
 
   const stepVariants = {
-    inactive: { 
-      scale: shouldReduceMotion ? 1 : 0.95,
-      opacity: 0.6,
-      filter: 'blur(1px)'
-    },
-    active: { 
-      scale: 1,
-      opacity: 1,
-      filter: 'blur(0px)'
-    }
-  };
-
-  const contentVariants = {
-    hidden: { opacity: 0, x: 20 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 }
+    inactive: { opacity: 0.6 },
+    active: { opacity: 1 }
   };
 
   return (
@@ -147,51 +130,52 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
         ease: "easeOut"
       }}
     >
-      {/* Step Navigation */}
-      <div className="flex flex-col items-center gap-8 lg:flex-row lg:gap-16">
+      <div className="flex flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:gap-16">
         {/* Step Indicators */}
-        <div className="flex gap-4 lg:flex-col">
+        <div className="flex w-full gap-2 sm:gap-4 lg:w-auto lg:flex-col">
           {workflowSteps.map((step, index) => (
             <motion.button
               key={step.id}
               onClick={() => handleStepClick(index)}
-              className="group relative flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-300 hover:border-opacity-40 lg:min-w-[280px] lg:flex-none"
+              className="group relative flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-sm sm:gap-4 sm:rounded-2xl sm:p-6 lg:min-w-[280px] lg:flex-none"
               variants={stepVariants}
               animate={activeStep === index ? 'active' : 'inactive'}
               transition={{ 
-                duration: shouldReduceMotion ? 0.1 : (activeStep === index ? 0.5 : 0.4)
+                duration: shouldReduceMotion ? 0.1 : 0.4,
+                ease: 'easeInOut'
               }}
               style={{
                 background: activeStep === index ? step.color : 'var(--card-2)',
-                borderColor: activeStep === index ? step.accentColor : 'var(--border)'
+                borderColor: activeStep === index ? step.accentColor : 'var(--border)',
+                transition: 'background 0.5s ease-in-out, border-color 0.5s ease-in-out'
               }}
               whileHover={shouldReduceMotion ? {} : { 
-                scale: 1.02,
-                transition: { duration: 0.2 }
+                opacity: 0.9,
+                transition: { duration: 0.15 }
               }}
-              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+              whileTap={shouldReduceMotion ? {} : { opacity: 0.8 }}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <div 
-                  className="flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold transition-all duration-300"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold sm:h-12 sm:w-12 sm:rounded-xl sm:text-lg"
                   style={{
                     background: activeStep === index ? step.accentColor : 'var(--border)',
-                    color: activeStep === index ? 'white' : 'var(--muted)'
+                    color: activeStep === index ? 'white' : 'var(--muted)',
+                    transition: 'background 0.5s ease-in-out, color 0.5s ease-in-out'
                   }}
                 >
                   {String(index + 1).padStart(2, '0')}
                 </div>
                 <div className="min-w-0 flex-1 text-left">
-                  <h3 className="text-sm font-semibold text-[var(--fg)] lg:text-base">
+                  <h3 className="text-[11px] font-semibold leading-tight text-[var(--fg)] sm:text-sm lg:text-base">
                     {step.title}
                   </h3>
-                  <p className="text-xs text-[var(--muted)] lg:text-sm">
+                  <p className="hidden text-xs text-[var(--muted)] sm:block lg:text-sm">
                     {step.subtitle}
                   </p>
                 </div>
               </div>
 
-              {/* Active indicator */}
               {activeStep === index && (
                 <motion.div
                   className="absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full"
@@ -199,18 +183,21 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
-                  transition={{ duration: shouldReduceMotion ? 0.1 : 0.3 }}
+                  transition={{ duration: shouldReduceMotion ? 0.1 : 0.4, ease: 'easeInOut' }}
                 />
               )}
             </motion.button>
           ))}
         </div>
 
-        {/* Demo Visualization */}
-        <div className="flex-1 lg:min-h-[500px]">
-          <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] p-8 backdrop-blur-sm">
+        {/* Demo Visualization — fixed height container */}
+        <div className="w-full flex-1 lg:min-h-[500px]">
+          <div 
+            className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 backdrop-blur-sm sm:rounded-3xl sm:p-8"
+            style={{ minHeight: '480px' }}
+          >
             {/* Playback Controls */}
-            <div className="absolute right-6 top-6 flex items-center gap-2">
+            <div className="absolute right-3 top-3 z-10 flex items-center gap-2 sm:right-6 sm:top-6">
               <button
                 onClick={togglePlayPause}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card-2)] text-xs transition-all hover:border-opacity-50"
@@ -223,41 +210,47 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
               </div>
             </div>
 
-            {/* Step Content */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeStep}
-                variants={contentVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="h-full"
-                transition={{ 
-                  duration: shouldReduceMotion ? 0.1 : 0.5,
-                  ease: "easeOut"
-                }}
-              >
-                {activeStep === 0 && <IngestVisualization progress={documentProgress} />}
-                {activeStep === 1 && <GenerateVisualization 
-                  showThinking={showAIThinking} 
-                  confidence={confidence} 
-                />}
-                {activeStep === 2 && <ExportVisualization />}
-              </motion.div>
-            </AnimatePresence>
+            {/* Step Content — crossfade with fixed dimensions */}
+            <div className="relative" style={{ minHeight: '340px' }}>
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.div
+                  key={activeStep}
+                  initial={{ opacity: 0, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, filter: 'blur(4px)', position: 'absolute', top: 0, left: 0, right: 0 }}
+                  className="will-change-[opacity,filter]"
+                  transition={{ 
+                    duration: shouldReduceMotion ? 0.05 : 0.6,
+                    ease: [0.4, 0, 0.2, 1]
+                  }}
+                >
+                  <div style={{ minHeight: '340px' }}>
+                    {activeStep === 0 && <IngestVisualization progress={documentProgress} />}
+                    {activeStep === 1 && <GenerateVisualization 
+                      showThinking={showAIThinking} 
+                      confidence={confidence} 
+                    />}
+                    {activeStep === 2 && <ExportVisualization />}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-            {/* Step Description */}
-            <motion.div 
-              key={`desc-${activeStep}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: shouldReduceMotion ? 0.1 : 0.3 }}
-              className="mt-6 border-t border-[var(--border)] pt-6"
-            >
-              <p className="text-sm leading-relaxed text-[var(--muted)]">
-                {workflowSteps[activeStep].description}
-              </p>
-            </motion.div>
+            {/* Step Description — smooth text crossfade */}
+            <div className="mt-6 border-t border-[var(--border)] pt-6">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.p
+                  key={activeStep}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6, position: 'absolute' }}
+                  transition={{ duration: shouldReduceMotion ? 0.05 : 0.4, ease: 'easeInOut' }}
+                  className="text-sm leading-relaxed text-[var(--muted)]"
+                >
+                  {workflowSteps[activeStep].description}
+                </motion.p>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -269,19 +262,20 @@ export default function WorkflowDemo({ autoPlay = true, className = '' }: Workfl
           style={{ background: 'var(--vault-blue)' }}
           initial={{ width: 0 }}
           animate={{ width: `${((activeStep + 1) / workflowSteps.length) * 100}%` }}
-          transition={{ duration: shouldReduceMotion ? 0.1 : 0.5 }}
+          transition={{ duration: shouldReduceMotion ? 0.1 : 0.7, ease: 'easeInOut' }}
         />
       </div>
     </motion.div>
   );
 }
 
-// Individual step visualizations
+// ─── Visualization Components (consistent height: 340px min) ───
+
 function IngestVisualization({ progress }: { progress: number }) {
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
           📁
@@ -292,17 +286,18 @@ function IngestVisualization({ progress }: { progress: number }) {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-2.5">
         {documentTypes.map((doc, index) => (
           <motion.div
             key={doc.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ 
               delay: index * 0.1, 
-              duration: shouldReduceMotion ? 0.1 : 0.4 
+              duration: shouldReduceMotion ? 0.05 : 0.3,
+              ease: 'easeOut'
             }}
-            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card-2)] p-3"
+            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3"
           >
             <div className="flex items-center gap-3">
               <div className="text-lg">📄</div>
@@ -314,8 +309,9 @@ function IngestVisualization({ progress }: { progress: number }) {
             <div className="flex items-center gap-2">
               {progress > index * 25 && (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
                   className="text-green-500"
                 >
                   ✓
@@ -327,16 +323,16 @@ function IngestVisualization({ progress }: { progress: number }) {
         ))}
       </div>
 
-      <div className="space-y-2">
+      <div className="mt-auto space-y-2">
         <div className="flex justify-between text-xs text-[var(--muted)]">
           <span>Indexing Progress</span>
-          <span>{Math.round(progress)}%</span>
+          <span>{Math.round(Math.min(progress, 100))}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-[var(--border)]">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: shouldReduceMotion ? 0.1 : 0.3 }}
+            animate={{ width: `${Math.min(progress, 100)}%` }}
+            transition={{ duration: shouldReduceMotion ? 0.1 : 0.4, ease: 'easeOut' }}
           />
         </div>
       </div>
@@ -348,76 +344,80 @@ function GenerateVisualization({ showThinking, confidence }: { showThinking: boo
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] p-4">
-        <div className="mb-3 flex items-center gap-2">
+    <div className="flex flex-col gap-5">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3">
+        <div className="mb-2 flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-orange-400"></div>
           <span className="text-sm font-medium text-[var(--fg)]">Security Question</span>
         </div>
         <p className="text-sm text-[var(--muted)]">{sampleQuestion}</p>
       </div>
 
-      <AnimatePresence>
-        {showThinking && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: shouldReduceMotion ? 0.1 : 0.4 }}
-            className="flex items-center justify-center py-8"
-          >
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                className="h-6 w-6 rounded-full border-2 border-[var(--vault-blue)] border-t-transparent"
-              />
-              <span className="text-sm text-[var(--muted)]">AI analyzing evidence...</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {!showThinking && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: shouldReduceMotion ? 0.1 : 0.5 }}
-          className="space-y-4"
-        >
-          <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-400"></div>
-                <span className="text-sm font-medium text-[var(--fg)]">Generated Answer</span>
+      {/* Fixed-height area for thinking/answer — prevents layout shift */}
+      <div style={{ minHeight: '200px' }}>
+        <AnimatePresence mode="wait">
+          {showThinking ? (
+            <motion.div
+              key="thinking"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0.1 : 0.4, ease: 'easeInOut' }}
+              className="flex items-center justify-center py-12"
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                  className="h-6 w-6 rounded-full border-2 border-[var(--vault-blue)] border-t-transparent"
+                />
+                <span className="text-sm text-[var(--muted)]">AI analyzing evidence...</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--muted)]">Confidence:</span>
-                <span className="text-xs font-semibold text-green-400">
-                  {Math.round(confidence)}%
-                </span>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="answer"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0.1 : 0.5, ease: 'easeOut' }}
+              className="flex flex-col gap-4"
+            >
+              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-green-400"></div>
+                    <span className="text-sm font-medium text-[var(--fg)]">Generated Answer</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[var(--muted)]">Confidence:</span>
+                    <span className="text-xs font-semibold text-green-400">
+                      {Math.round(confidence)}%
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed text-[var(--fg)]">{sampleAnswer}</p>
               </div>
-            </div>
-            <p className="text-sm leading-relaxed text-[var(--fg)]">{sampleAnswer}</p>
-          </div>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-[var(--fg)]">Source Citations</h4>
-            {['Security Policy Section 4.2', 'SOC 2 Type II Report'].map((citation, index) => (
-              <motion.div
-                key={citation}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1, duration: shouldReduceMotion ? 0.1 : 0.3 }}
-                className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--card-2)] p-2"
-              >
-                <div className="text-xs">🔗</div>
-                <span className="text-xs text-[var(--muted)]">{citation}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      )}
+              <div className="flex flex-col gap-2">
+                <h4 className="text-sm font-medium text-[var(--fg)]">Source Citations</h4>
+                {['Security Policy Section 4.2', 'SOC 2 Type II Report'].map((citation, index) => (
+                  <motion.div
+                    key={citation}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.12, duration: shouldReduceMotion ? 0.1 : 0.35, ease: 'easeOut' }}
+                    className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--card-2)] px-3 py-2"
+                  >
+                    <div className="text-xs">🔗</div>
+                    <span className="text-xs text-[var(--muted)]">{citation}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -426,7 +426,7 @@ function ExportVisualization() {
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
           ⚡
@@ -437,11 +437,11 @@ function ExportVisualization() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <motion.button
           whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-          className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-left transition-colors"
+          className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-left transition-colors"
         >
           <div className="flex items-center gap-2">
             <span className="text-lg">✓</span>
@@ -453,7 +453,7 @@ function ExportVisualization() {
         <motion.button
           whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-          className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] p-4 text-left transition-colors hover:border-opacity-50"
+          className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3 text-left transition-colors hover:border-opacity-50"
         >
           <div className="flex items-center gap-2">
             <span className="text-lg">✏️</span>
@@ -463,15 +463,15 @@ function ExportVisualization() {
         </motion.button>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-2.5">
         <h4 className="text-sm font-medium text-[var(--fg)]">Export Options</h4>
         {['SOC 2 Template', 'Custom DDQ Format', 'SIG Lite Standard'].map((format, index) => (
           <motion.div
             key={format}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: shouldReduceMotion ? 0.1 : 0.3 }}
-            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card-2)] p-3"
+            transition={{ delay: index * 0.1, duration: shouldReduceMotion ? 0.1 : 0.35, ease: 'easeOut' }}
+            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3"
           >
             <span className="text-sm text-[var(--fg)]">{format}</span>
             <button className="text-xs font-medium transition-colors hover:text-[var(--vault-blue)]" style={{ color: 'var(--vault-blue)' }}>
@@ -482,10 +482,10 @@ function ExportVisualization() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: shouldReduceMotion ? 0.1 : 0.5 }}
-        className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 text-center"
+        transition={{ delay: 0.4, duration: shouldReduceMotion ? 0.1 : 0.5, ease: 'easeOut' }}
+        className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-center"
       >
         <div className="text-sm font-semibold text-[var(--fg)]">
           🎉 Questionnaire Complete
