@@ -21,22 +21,21 @@ const FIELDS = [
   { id: "audit", label: "Evidence / audit trail" },
 ];
 
-// Fetch document answers from API with caching
+// Fetch doc answers from API (client-safe). We use a tiny in-memory cache to avoid repeats.
+const _answersCache = new Map<string, Record<string, string>>();
+
 async function getDocumentAnswers(docId: string): Promise<Record<string, string>> {
-  try {
-    const response = await fetch(`/api/knowledge?docId=${docId}`, {
-      // Add caching for performance
-      next: { revalidate: 300 } // Cache for 5 minutes
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: Failed to fetch document answers`);
-    }
-    const data = await response.json();
-    return data.answers || {};
-  } catch (error) {
-    console.warn('Error fetching document answers:', error);
-    throw error;
+  const cached = _answersCache.get(docId);
+  if (cached) return cached;
+
+  const response = await fetch(`/api/knowledge?docId=${encodeURIComponent(docId)}`);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: Failed to fetch document answers`);
   }
+  const data = await response.json();
+  const answers = (data?.answers ?? {}) as Record<string, string>;
+  _answersCache.set(docId, answers);
+  return answers;
 }
 
 export default function LivePreview({
@@ -44,6 +43,7 @@ export default function LivePreview({
 }: {
   onCta: () => void;
 }) {
+  console.log("LivePreview Rendered");
   const reduceMotion = useReducedMotion();
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.18, once: false });
@@ -55,57 +55,62 @@ export default function LivePreview({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Start the demo automatically (and also when it scrolls into view)
+  React.useEffect(() => {
+    if (reduceMotion) return;
+    setIsAnimating(true);
+  }, [reduceMotion]);
+
   React.useEffect(() => {
     if (reduceMotion) return;
     if (inView) setIsAnimating(true);
   }, [inView, reduceMotion]);
 
+  // Drive the autoplay loop by advancing activeDoc.
   React.useEffect(() => {
     if (reduceMotion) return;
     if (!isAnimating) return;
 
-    const tick = async () => {
+    const tick = () => {
       setFilled(false);
-      setLoading(true);
-      setError(null);
-      
-      setActiveDoc((d) => {
-        const next = (d + 1) % DOCS.length;
-        // Load answers for the next document
-        const nextDoc = DOCS[next];
-        if (nextDoc) {
-          getDocumentAnswers(nextDoc.id)
-            .then(docAnswers => {
-              setAnswers(docAnswers);
-              setError(null);
-            })
-            .catch(err => {
-              setError(err.message);
-              // Fallback to empty answers
-              setAnswers({});
-            })
-            .finally(() => {
-              setLoading(false);
-            });
-        }
-        return next;
-      });
-      
-      window.setTimeout(() => {
-        if (!loading) {
-          setFilled(true);
-        }
-      }, 520);
+      setActiveDoc((d) => (d + 1) % DOCS.length);
+      // success state: 500ms after the document "lands"
+      window.setTimeout(() => setFilled(true), 500);
     };
 
-    // Kick immediately so it never feels "stalled".
     tick();
-
     const id = window.setInterval(tick, 2600);
     return () => window.clearInterval(id);
   }, [isAnimating, reduceMotion]);
 
   const doc = DOCS[activeDoc];
+
+  // Fetch answers whenever the active doc changes.
+  React.useEffect(() => {
+    if (!doc) return;
+    let cancelled = false;
+
+    setLoading(true);
+    setError(null);
+    getDocumentAnswers(doc.id)
+      .then((docAnswers) => {
+        if (cancelled) return;
+        setAnswers(docAnswers);
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        setError(err?.message ?? "failed_to_load");
+        setAnswers({});
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [doc?.id]);
 
   return (
     <section ref={ref} className="py-14 md:py-16">
@@ -141,7 +146,11 @@ export default function LivePreview({
             {/* Split screen */}
             <div
               className="mt-8 grid gap-5 md:grid-cols-2"
-              onClick={() => setIsAnimating(true)}
+              onClick={() => {
+                console.log("LivePreview clicked");
+                setIsAnimating(true);
+              }}
+              style={{ overflow: "visible" }}
             >
               {/* Left: Knowledge Vault */}
               <div className="min-h-[320px] rounded-2xl border border-[var(--border)] bg-black/10 p-5">
@@ -157,24 +166,10 @@ export default function LivePreview({
                       <button
                         type="button"
                         key={d.id}
-                        onClick={async () => {
+                        onClick={() => {
                           setIsAnimating(false);
                           setActiveDoc(idx);
                           setFilled(false);
-                          setLoading(true);
-                          setError(null);
-                          
-                          try {
-                            const docAnswers = await getDocumentAnswers(d.id);
-                            setAnswers(docAnswers);
-                            setError(null);
-                          } catch (err: any) {
-                            setError(err.message);
-                            setAnswers({});
-                          } finally {
-                            setLoading(false);
-                          }
-                          
                           // simulate fill shortly after click
                           window.setTimeout(() => setFilled(true), 420);
                         }}
@@ -236,6 +231,7 @@ export default function LivePreview({
                       <motion.div
                         key={doc.id}
                         className="pointer-events-none absolute left-5 top-16"
+                        style={{ zIndex: 100 }}
                         initial={{ opacity: 0, x: -30, y: -6, scale: 0.98 }}
                         whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
                         animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
@@ -243,11 +239,11 @@ export default function LivePreview({
                         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <motion.div
-                          initial={{ x: 0, opacity: 1 }}
-                          animate={{ x: 260, opacity: 0 }}
-                          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                          initial={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+                          animate={{ x: 260, opacity: 0, filter: "blur(0.6px)" }}
+                          transition={{ type: "spring", stiffness: 100, damping: 20 }}
                           className="inline-flex items-center gap-2 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs font-semibold"
-                          style={{ color: "var(--vault-blue)", boxShadow: "0 0 30px rgba(59,130,246,0.18)" }}
+                          style={{ color: "var(--vault-blue)", boxShadow: "0 0 40px rgba(59,130,246,0.24)", willChange: "transform, opacity, filter" }}
                         >
                           <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
                           <span className="max-w-[190px] truncate">{doc.name}</span>
