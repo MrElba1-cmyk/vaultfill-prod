@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -8,6 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LeadModal from "@/components/LeadModal";
 import LivePreview from "@/components/LivePreview";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import WorkflowDemo from "@/components/WorkflowDemo";
 import { useModal } from "@/contexts/ModalContext";
 
 const complianceBadges = ["SOC 2 Type II", "ISO 27001", "GDPR", "AES-256"];
@@ -114,6 +115,7 @@ function VaultLogo() {
 }
 
 export default function Home() {
+  const [leadOpen, setLeadOpen] = useState(false);
   const { isLeadModalOpen, openLeadModal, closeLeadModal } = useModal();
 
   return (
@@ -414,7 +416,7 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* WORKFLOW (uniform heights) */}
+        {/* WORKFLOW - Interactive Demo */}
         <motion.section id="how-it-works" className="py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
@@ -430,25 +432,9 @@ export default function Home() {
             </p>
           </Reveal>
 
-          <motion.div
-            className="mt-12 grid items-stretch gap-5 md:grid-cols-3"
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.10 } } }}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.20 }}
-          >
-            {steps.map((s) => (
-              <motion.div key={s.num} className="h-full" variants={reveal} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-                <div className="bento-card flex h-full flex-col">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-lg font-bold ring-1 ring-blue-500/20" style={{ color: "var(--vault-blue)" }}>
-                    {s.num}
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold text-[var(--fg)]">{s.title}</h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-[var(--muted)]">{s.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+          <div className="mt-12">
+            <WorkflowDemo />
+          </div>
         </motion.section>
 
         {/* FAQ */}

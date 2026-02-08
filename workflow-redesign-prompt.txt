@@ -1,0 +1,98 @@
+MISSION: Analyze world-class SaaS marketing sites and redesign VaultFill's workflow section with animations/interactions worthy of a billion-dollar company.
+
+PROJECT CONTEXT:
+- Product: VaultFill - Security questionnaire automation tool
+- Current State: Static 3-card workflow explanation (Ingest → Generate → Export)
+- Goal: Create an immersive, interactive workflow demo that sells the product visually
+- Tech Stack: Next.js 16, React, Framer Motion, Tailwind CSS
+- File Location: src/components/WorkflowDemo.tsx (new component to create)
+- Integration Point: src/app/page.tsx (replace existing static workflow cards)
+
+RESEARCH PHASE - Analyze these world-class examples:
+1. Linear.app - Fluid animations, subtle micro-interactions, sophisticated transitions
+2. Vercel.com - Clean timeline animations, smooth scroll-triggered reveals
+3. Stripe.com/payments - Product demo animations showing data flow
+4. Retool.com - Interactive product walkthroughs with real UI previews
+5. Loom.com - Step-by-step process visualization with motion
+6. Notion.so - Elegant state transitions and hover effects
+7. Framer.com - Advanced Framer Motion techniques, spring physics
+8. Railway.app - Modern glassmorphism, depth, and layering
+
+FOCUS AREAS TO STUDY:
+- How do they visualize data/document flow?
+- What micro-interactions make it feel premium? (hover states, cursor effects, parallax)
+- How do they use depth/layering? (shadows, blur, z-axis movement)
+- What animation timing/easing creates that "expensive" feel?
+- How do they balance auto-play vs user control?
+- What loading states, progress indicators, success states do they use?
+
+CREATIVE REQUIREMENTS:
+✓ Must feel premium - like a $10M+ marketing site, not a template
+✓ Tells the story: "messy documents → AI magic → clean answers"
+✓ Should make non-technical buyers understand the value instantly
+✓ Needs "wow" moment - something unexpected/delightful
+✓ Mobile responsive (don't sacrifice mobile for desktop wow-factor)
+✓ Performance conscious (smooth 60fps, no jank)
+
+WORKFLOW STORY TO VISUALIZE:
+Step 1 - "Ingest Evidence"
+- Show actual document types: PDFs, policies, audit reports
+- Visualize parsing/indexing (maybe text extraction, chunking animation?)
+- Knowledge Vault filling up with searchable content
+- Success state: "Evidence indexed and ready"
+
+Step 2 - "Generate Drafts" 
+- Show a real security question appearing
+- AI "reading" through documents (maybe highlight matching sections?)
+- Answer being drafted word-by-word or section-by-section
+- Citations appearing and linking back to source docs
+- Confidence score or quality indicator
+- Success state: "Draft ready for review"
+
+Step 3 - "Approve & Export"
+- Reviewer interface with approve/edit controls
+- Track changes or comment system
+- Audit log showing who approved what
+- Export options (Excel, Word, PDF)
+- Success state: "Questionnaire complete - 8 minutes instead of 2 weeks"
+
+TECHNICAL CONSTRAINTS:
+- Must use Framer Motion (already installed: framer-motion@12.33.0)
+- Component must be client-side: 'use client' directive
+- No external dependencies beyond what's installed
+- Should work with existing design system (CSS variables: --fg, --muted, --vault-blue, --border)
+- Must handle reduced motion preferences (useReducedMotion)
+- Consider code splitting if component is large
+
+DELIVERABLES:
+1. New file: src/components/WorkflowDemo.tsx
+2. Updated: src/app/page.tsx (import and use WorkflowDemo, remove static cards)
+3. Implementation notes: Explain key animation choices and techniques used
+4. Performance notes: Any optimization strategies employed
+
+EVALUATION CRITERIA:
+□ Does it look like it cost $50k+ to produce?
+□ Would a non-technical CFO understand the value after watching it?
+□ Does it use advanced animation techniques beyond basic fade/slide?
+□ Are there delightful micro-interactions that reward exploration?
+□ Does it feel native to the existing site design (not bolted-on)?
+□ Is it smooth on both desktop and mobile?
+□ Does it tell a clear story without requiring explanation?
+
+IMPORTANT NOTES:
+- Don't just make it "move more" - make it purposeful and elegant
+- Study the easing curves and spring physics of reference sites
+- Less is often more - a few perfect animations > many mediocre ones
+- The goal is to make people go "wow, this product is legit"
+- Consider adding a "See it in action" CTA that triggers a full demo cycle
+
+FILE STRUCTURE:
+src/components/WorkflowDemo.tsx - Main component
+src/app/page.tsx - Integration point (replace motion.div grid around line 422)
+
+CURRENT WORKFLOW SECTION LOCATION:
+Line ~422 in src/app/page.tsx:
+  <motion.section id="how-it-works" ...>
+    Replace the grid of static cards with: <WorkflowDemo />
+
+Begin analysis and implementation. Show me world-class.
