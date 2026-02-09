@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-vault-bg text-white antialiased;
+}
+
+/* Subtle background texture */
+.vaultfill-bg {
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(124, 58, 237, 0.22), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(59, 130, 246, 0.18), transparent 55%),
+    radial-gradient(900px 600px at 50% 100%, rgba(16, 185, 129, 0.14), transparent 60%),
+    linear-gradient(180deg, #050711 0%, #03040b 100%);
+}
+
+/* Logo wall scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll {
+  animation: scroll 25s linear infinite;
+}
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
