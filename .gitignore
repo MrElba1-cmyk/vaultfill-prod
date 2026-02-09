@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# Lead data (private — never commit)
+data/leads-secure.json
+data/leads.json
+data/leads.backup.json
+data/index-manifest.json

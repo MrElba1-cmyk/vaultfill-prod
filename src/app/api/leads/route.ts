@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { saveLead, type Lead } from "@/lib/leads-db";
 
-type Lead = {
+type LeadInput = {
   email: string;
   createdAt: string;
   ua?: string;
@@ -106,10 +107,10 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
       email?: string;
-      monthlyVolume?: Lead["monthlyVolume"];
-      currentProcess?: Lead["currentProcess"];
-      primaryFormats?: Lead["primaryFormats"];
-      role?: Lead["role"];
+      monthlyVolume?: LeadInput["monthlyVolume"];
+      currentProcess?: LeadInput["currentProcess"];
+      primaryFormats?: LeadInput["primaryFormats"];
+      role?: LeadInput["role"];
     };
     const email = (body.email ?? "").trim().toLowerCase();
 
@@ -127,40 +128,35 @@ export async function POST(req: Request) {
       primaryFormats: body.primaryFormats,
       role: body.role,
       tier,
+      source: "web",
     };
 
-    // NOTE:
-    // - Works locally.
-    // - On Vercel, filesystem writes are typically ephemeral / may fail.
-    //   We still return 200 so the user gets a success UI, while logging server-side.
-    const filePath = path.join(process.cwd(), "data", "leads.json");
+    // DATABASE-FIRST: Write to secure database BEFORE any notifications
+    try {
+      const saved = await saveLead(lead);
+      if (!saved) {
+        console.warn("[VaultFill] Lead save returned false for:", email);
+      }
+    } catch (err) {
+      console.error("[VaultFill] Lead database write failed:", err);
+      // Continue — we still want to attempt notifications
+    }
 
+    // Legacy JSON fallback (kept for backward compat, but DB is primary)
+    const filePath = path.join(process.cwd(), "data", "leads.json");
     try {
       await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-      let existing: Lead[] = [];
+      let existing: LeadInput[] = [];
       try {
         const raw = await fs.readFile(filePath, "utf8");
-        existing = JSON.parse(raw || "[]") as Lead[];
+        existing = JSON.parse(raw || "[]") as LeadInput[];
         if (!Array.isArray(existing)) existing = [];
-      } catch {
-        existing = [];
-      }
-
-      // Backup last file for easy CRM export recovery
-      try {
-        await fs.copyFile(
-          filePath,
-          path.join(path.dirname(filePath), "leads.backup.json")
-        );
-      } catch {
-        // ignore
-      }
-
-      // de-dupe by email (newest first)
+      } catch { existing = []; }
       const next = [lead, ...existing.filter((l) => (l?.email ?? "") !== email)];
       await fs.writeFile(filePath, JSON.stringify(next, null, 2) + "\n", "utf8");
+    } catch { /* best effort */ }
 
+    try {
       // Lead alerts (tier2 and tier1) — Telegram Bot API 2.0
       if (lead.tier === "tier1" || lead.tier === "tier2") {
         const domain = getEmailDomain(lead.email);
