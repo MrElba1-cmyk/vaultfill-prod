@@ -3,6 +3,7 @@ import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import fs from "fs";
 import path from "path";
+import { semanticSearch, type SearchResult } from "@/lib/vector-search";
 
 interface KnowledgeSection {
   title: string;
@@ -66,6 +67,13 @@ function searchKnowledge(query: string, sections: KnowledgeSection[]): Knowledge
     .slice(0, 6);
 
   return scored.map((x) => x.section);
+}
+
+/** Check if vector index exists */
+function hasVectorIndex(): boolean {
+  try {
+    return fs.existsSync(path.join(process.cwd(), "data", "vector-index.json"));
+  } catch { return false; }
 }
 
 const SYSTEM_PROMPT = `You are the VaultFill Technical Support AI Assistant, an expert in GRC (Governance, Risk, and Compliance) and security questionnaires.
@@ -139,14 +147,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // Load and search knowledge base
-    const sections = loadKnowledgeBase();
-    const matches = searchKnowledge(message, sections);
+    // Load and search knowledge base — prefer semantic (vector) search, fall back to keyword
+    let matches: KnowledgeSection[] = [];
+    let searchMode = "keyword";
+    
+    if (hasVectorIndex() && process.env.OPENAI_API_KEY) {
+      try {
+        const vectorResults = await semanticSearch(message, 6);
+        matches = vectorResults.map((r) => ({
+          title: r.title,
+          content: r.content,
+          filename: r.filename,
+        }));
+        searchMode = "semantic";
+      } catch (err) {
+        console.error("Semantic search failed, falling back to keyword:", err);
+        const sections = loadKnowledgeBase();
+        matches = searchKnowledge(message, sections);
+      }
+    } else {
+      const sections = loadKnowledgeBase();
+      matches = searchKnowledge(message, sections);
+    }
     
     // Prepare context from knowledge base
     let knowledgeContext = "";
     if (matches.length > 0) {
-      knowledgeContext = "RELEVANT KNOWLEDGE VAULT INFORMATION:\n\n";
+      knowledgeContext = `RELEVANT KNOWLEDGE VAULT INFORMATION (via ${searchMode} search):\n\n`;
       for (const match of matches) {
         knowledgeContext += `**${match.title}** (from ${match.filename}):\n${match.content}\n\n`;
       }
