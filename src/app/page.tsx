@@ -192,16 +192,15 @@ export default function Home() {
 
               <Reveal>
                 <h1 className="mt-6 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[var(--fg)] sm:mt-8 sm:text-4xl md:text-[58px]">
-                  Security questionnaires,
-                  <span className="text-gradient-blue"> completed at enterprise speed.</span>
+                  Eliminate Security Questionnaire Pain:
+                  <span className="text-gradient-blue"> Save 400+ hours and cut compliance costs by 85%.</span>
                 </h1>
               </Reveal>
 
               <Reveal>
                 <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-[var(--muted)] sm:mt-6 sm:text-[15.5px] md:text-lg">
-                  Turn policies, audit artifacts, and standard responses into a private Knowledge Vault.
-                  VaultFill drafts answers with <span className="font-semibold text-[var(--fg)]">verifiable citations</span> —
-                  so reviewers approve in minutes, not weeks.
+                  Stop wrestling with security questionnaires. VaultFill’s AI-powered Knowledge Vault transforms your existing evidence (policies, audits, docs) into instant, verifiable answers.
+                  <span className="font-semibold text-[var(--fg)]">Get CISO-grade responses with verifiable citations in minutes, not weeks.</span> Achieve compliance faster, without integration headaches or generic AI.
                 </p>
               </Reveal>
 
