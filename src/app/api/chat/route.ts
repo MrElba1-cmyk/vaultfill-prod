@@ -87,8 +87,13 @@ export async function POST(req: Request) {
   // Record the user message
   if (query) recordMessage(sessionId, 'user', query);
 
-  // Semantic RAG via embeddings
-  const ragContext = query ? await queryKnowledgeVault(query) : '';
+  // Semantic RAG via embeddings (graceful degradation)
+  let ragContext = '';
+  try {
+    ragContext = query ? await queryKnowledgeVault(query) : '';
+  } catch (ragErr) {
+    console.error('[chat] RAG query failed, continuing without context:', ragErr);
+  }
   const sessionContext = getSessionContext(sessionId);
 
   const result = streamText({
@@ -137,7 +142,10 @@ export async function POST(req: Request) {
 
     return result.toUIMessageStreamResponse();
   } catch (err) {
-    // Avoid leaking internals; just return 500.
-    return new Response(null, { status: 500 });
+    console.error('[chat] POST handler error:', err);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
