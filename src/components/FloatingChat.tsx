@@ -105,8 +105,17 @@ export default function FloatingChat() {
   const [hasUnread, setHasUnread] = useState(false);
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [onboardingState, setOnboardingState] = useState<OnboardingState>('S1');
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /* Fetch CSRF token on mount */
+  useEffect(() => {
+    fetch('/api/csrf-token')
+      .then(r => r.json())
+      .then(data => setCsrfToken(data.csrfToken))
+      .catch(() => { /* CSRF fetch failed, will retry on send */ });
+  }, []);
 
   /* Persist / restore */
   useEffect(() => {
@@ -160,9 +169,15 @@ export default function FloatingChat() {
     setIsLoading(true);
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-vaultfill-session-id': sessionId,
+      };
+      if (csrfToken) headers['x-csrf-token'] = csrfToken;
+
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-vaultfill-session-id': sessionId },
+        headers,
         body: JSON.stringify({ message: trimmed, messages: messages.slice(-8) }),
       });
       if (!res.ok) throw new Error('Failed');

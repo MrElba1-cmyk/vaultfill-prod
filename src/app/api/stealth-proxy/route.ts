@@ -1,4 +1,5 @@
 import { sendStealthAlert, type AlertPayload } from '../../../lib/stealth-proxy';
+import { csrfGuard, rateLimitGuard, safeErrorMessage, RATE_LIMITS } from '../../../lib/security';
 
 export const runtime = 'nodejs';
 
@@ -10,6 +11,10 @@ export const runtime = 'nodejs';
  * Requires STEALTH_PROXY_SECRET for authentication.
  */
 export async function POST(req: Request) {
+  // Rate limiting: 20 req/min per IP
+  const rateLimited = rateLimitGuard(req, '/api/stealth-proxy', RATE_LIMITS.onboarding);
+  if (rateLimited) return rateLimited;
+
   const secret = process.env.STEALTH_PROXY_SECRET;
   const authHeader = req.headers.get('authorization');
 
@@ -32,6 +37,6 @@ export async function POST(req: Request) {
 
     return Response.json({ ok: allOk, results }, { status: allOk ? 200 : 207 });
   } catch (e) {
-    return Response.json({ error: (e as Error).message }, { status: 500 });
+    return Response.json({ error: safeErrorMessage(e) }, { status: 500 });
   }
 }

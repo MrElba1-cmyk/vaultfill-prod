@@ -13,6 +13,7 @@ import {
   STATE_LABELS,
 } from '../../../lib/onboarding-state-machine';
 import { trackEvent } from '../../../lib/analytics';
+import { csrfGuard, rateLimitGuard, safeLog, safeErrorMessage, RATE_LIMITS } from '../../../lib/security';
 
 export const runtime = 'nodejs';
 
@@ -61,7 +62,21 @@ Response style:
 }
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  // Rate limiting: 20 req/min per IP
+  const rateLimited = rateLimitGuard(req, '/api/chat', RATE_LIMITS.chat);
+  if (rateLimited) return rateLimited;
+
+  // CSRF protection
+  const csrf = csrfGuard(req);
+  if (csrf.error) return csrf.error;
+
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json({ error: 'Invalid request body.' }, { status: 400 });
+  }
+  const { messages } = body;
   const sessionId = req.headers.get('x-vaultfill-session-id') || 'anonymous';
 
   // Session tracking
@@ -99,7 +114,7 @@ export async function POST(req: Request) {
       }
 
       if (piiBlocked) {
-        console.warn(`[guardrail] PII solicitation blocked in state ${machine.state} for session ${sessionId}`);
+        safeLog.warn(`[guardrail] PII solicitation blocked in state ${machine.state} for session ${sessionId}`);
       }
     },
   });
