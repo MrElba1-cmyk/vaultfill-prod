@@ -1,11 +1,12 @@
 #!/usr/bin/env npx tsx
 /**
- * ingest-vault.ts — Chunks markdown files from data/sample-vault into ~500-token segments,
- * generates OpenAI embeddings, and writes a vector index JSON file.
+ * ingest-vault.ts — Chunks markdown files from docs/ directory,
+ * generates OpenAI embeddings, and stores them in PostgreSQL via Prisma (pgvector).
  */
 
 import fs from "fs";
 import path from "path";
+import { PrismaClient } from "@prisma/client";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_API_KEY) {
@@ -13,25 +14,17 @@ if (!OPENAI_API_KEY) {
   process.exit(1);
 }
 
-const VAULT_DIR = path.join(process.cwd(), "data", "sample-vault");
-const INDEX_PATH = path.join(process.cwd(), "data", "vector-index.json");
+const prisma = new PrismaClient();
+const DOCS_DIR = path.join(process.cwd(), "docs");
 const CHUNK_SIZE = 500; // ~500 tokens ≈ 2000 chars
 const EMBEDDING_MODEL = "text-embedding-3-small";
+const BATCH_SIZE = 20; // embeddings per API call
 
 interface Chunk {
   id: string;
   filename: string;
   title: string;
   content: string;
-  charCount: number;
-}
-
-interface VectorEntry {
-  id: string;
-  filename: string;
-  title: string;
-  content: string;
-  embedding: number[];
 }
 
 function chunkMarkdown(filename: string, text: string): Chunk[] {
@@ -44,7 +37,6 @@ function chunkMarkdown(filename: string, text: string): Chunk[] {
   function flush() {
     const trimmed = currentContent.trim();
     if (trimmed.length > 50) {
-      // ~4 chars per token, so 500 tokens ≈ 2000 chars
       const maxChars = CHUNK_SIZE * 4;
       for (let i = 0; i < trimmed.length; i += maxChars) {
         const segment = trimmed.slice(i, i + maxChars);
@@ -53,7 +45,6 @@ function chunkMarkdown(filename: string, text: string): Chunk[] {
           filename,
           title: currentTitle,
           content: segment,
-          charCount: segment.length,
         });
       }
       currentContent = "";
@@ -91,13 +82,26 @@ async function getEmbeddings(texts: string[]): Promise<number[][]> {
 }
 
 async function main() {
-  console.log("📂 Reading vault files...");
-  const files = fs.readdirSync(VAULT_DIR).filter((f) => f.endsWith(".md"));
+  // Also check data/sample-vault as fallback
+  let docsDir = DOCS_DIR;
+  if (!fs.existsSync(docsDir)) {
+    const fallback = path.join(process.cwd(), "data", "sample-vault");
+    if (fs.existsSync(fallback)) {
+      docsDir = fallback;
+      console.log(`📂 docs/ not found, using fallback: data/sample-vault/`);
+    } else {
+      console.error("No docs/ or data/sample-vault/ directory found");
+      process.exit(1);
+    }
+  }
+
+  console.log(`📂 Reading files from ${docsDir}...`);
+  const files = fs.readdirSync(docsDir).filter((f) => f.endsWith(".md"));
   console.log(`  Found ${files.length} files: ${files.join(", ")}`);
 
   const allChunks: Chunk[] = [];
   for (const file of files) {
-    const content = fs.readFileSync(path.join(VAULT_DIR, file), "utf-8");
+    const content = fs.readFileSync(path.join(docsDir, file), "utf-8");
     const chunks = chunkMarkdown(file, content);
     allChunks.push(...chunks);
     console.log(`  ${file}: ${chunks.length} chunks`);
@@ -106,20 +110,46 @@ async function main() {
   console.log(`\n🧩 Total chunks: ${allChunks.length}`);
   console.log("🔢 Generating embeddings...");
 
-  const texts = allChunks.map((c) => `${c.title}\n${c.content}`);
-  const embeddings = await getEmbeddings(texts);
+  // Process in batches
+  const allEmbeddings: number[][] = [];
+  for (let i = 0; i < allChunks.length; i += BATCH_SIZE) {
+    const batch = allChunks.slice(i, i + BATCH_SIZE);
+    const texts = batch.map((c) => `${c.title}\n${c.content}`);
+    const embeddings = await getEmbeddings(texts);
+    allEmbeddings.push(...embeddings);
+    console.log(`  Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(allChunks.length / BATCH_SIZE)} done`);
+  }
 
-  const index: VectorEntry[] = allChunks.map((chunk, i) => ({
-    id: chunk.id,
-    filename: chunk.filename,
-    title: chunk.title,
-    content: chunk.content,
-    embedding: embeddings[i],
-  }));
+  console.log("\n💾 Storing in database...");
 
-  fs.writeFileSync(INDEX_PATH, JSON.stringify(index, null, 2));
-  console.log(`\n✅ Vector index written to ${INDEX_PATH}`);
-  console.log(`   ${index.length} entries, ${embeddings[0]?.length} dimensions each`);
+  // Clear existing data
+  await prisma.documentSection.deleteMany();
+
+  // Insert chunks with embeddings using raw SQL for vector type
+  for (let i = 0; i < allChunks.length; i++) {
+    const chunk = allChunks[i];
+    const embedding = allEmbeddings[i];
+    const vectorStr = `[${embedding.join(",")}]`;
+
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "DocumentSection" (id, content, embedding, metadata, source)
+       VALUES ($1, $2, $3::vector, $4::jsonb, $5)`,
+      chunk.id,
+      chunk.content,
+      vectorStr,
+      JSON.stringify({ title: chunk.title, filename: chunk.filename }),
+      chunk.filename
+    );
+  }
+
+  console.log(`\n✅ Ingested ${allChunks.length} document sections into database`);
+  console.log(`   ${allEmbeddings[0]?.length} dimensions per embedding`);
+
+  await prisma.$disconnect();
 }
 
-main().catch(console.error);
+main().catch(async (e) => {
+  console.error(e);
+  await prisma.$disconnect();
+  process.exit(1);
+});
