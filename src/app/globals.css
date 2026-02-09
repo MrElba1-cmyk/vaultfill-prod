@@ -1,32 +1,41 @@
 @import "tailwindcss";
 
 /*
-  VaultFill 2.0 — Strict Contrast Theme Map
-  Requirements:
-  - DARK: Slate-200 text on Slate-950 background
-  - LIGHT: Slate-900 text on Slate-50 background
-  - Light mode functional blue MUST be darker for WCAG AA on mobile (#1D4ED8)
+  VaultFill — The Apex Theme
+  High-contrast Glassmorphism: Cyan / Emerald / Charcoal
+  Complements The Apex segmented triangle mark
 */
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Functional accent */
-  --vault-blue: #60a5fa; /* light blue for dark mode */
-  --trust: #3b82f6;
+  /* Apex brand palette */
+  --apex-cyan: #00D4FF;
+  --apex-indigo: #6366F1;
+  --apex-silver: #CBD5E1;
+  --apex-emerald: #34D399;
 
-  /* DARK defaults */
-  --bg: #020617;      /* slate-950 */
-  --fg: #e2e8f0;      /* slate-200 */
-  --muted: #cbd5e1;   /* slate-300 */
-  --muted-2: #94a3b8; /* slate-400 */
+  /* Functional accent — maps to cyan in dark, deeper in light */
+  --vault-blue: #00D4FF;
+  --trust: #6366F1;
 
-  --card: rgba(2, 6, 23, 0.72);
-  --card-2: rgba(15, 23, 42, 0.62);
-  --border: rgba(255, 255, 255, 0.10);
+  /* DARK defaults — deep charcoal */
+  --bg: #0A0F1A;
+  --fg: #E8ECF4;
+  --muted: #B0BAC9;
+  --muted-2: #6B7A8D;
 
-  --shadow-natural: 0 18px 60px rgba(0, 0, 0, 0.45);
+  --card: rgba(12, 18, 32, 0.78);
+  --card-2: rgba(16, 24, 42, 0.68);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --shadow-natural: 0 18px 60px rgba(0, 0, 0, 0.55);
+
+  /* Glassmorphism glow accents */
+  --glow-cyan: rgba(0, 212, 255, 0.15);
+  --glow-indigo: rgba(99, 102, 241, 0.12);
+  --glow-emerald: rgba(52, 211, 153, 0.10);
 }
 
 html { color-scheme: dark; }
@@ -34,19 +43,23 @@ html { color-scheme: dark; }
 html.light {
   color-scheme: light;
 
-  /* WCAG-friendly functional blue */
-  --vault-blue: #1d4ed8; /* blue-700 */
+  --vault-blue: #0891B2; /* cyan-600 for WCAG AA */
+  --trust: #4F46E5;
 
-  --bg: #f8fafc;      /* slate-50 */
-  --fg: #0f172a;      /* slate-900 */
-  --muted: #334155;   /* slate-700 */
-  --muted-2: #475569; /* slate-600 */
+  --bg: #F1F5F9;
+  --fg: #0F172A;
+  --muted: #334155;
+  --muted-2: #475569;
 
-  --card: rgba(255, 255, 255, 0.72);
-  --card-2: rgba(255, 255, 255, 0.88);
-  --border: rgba(2, 6, 23, 0.10);
+  --card: rgba(255, 255, 255, 0.78);
+  --card-2: rgba(255, 255, 255, 0.90);
+  --border: rgba(15, 23, 42, 0.08);
 
-  --shadow-natural: 0 22px 70px rgba(2, 6, 23, 0.14);
+  --shadow-natural: 0 22px 70px rgba(2, 6, 23, 0.12);
+
+  --glow-cyan: rgba(0, 212, 255, 0.08);
+  --glow-indigo: rgba(99, 102, 241, 0.06);
+  --glow-emerald: rgba(52, 211, 153, 0.05);
 }
 
 html.dark { color-scheme: dark; }
@@ -55,39 +68,47 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-  line-height: 1.6; /* leading-relaxed */
+  line-height: 1.6;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Optical weighting: slightly heavier in light mode */
 html.light body { font-weight: 500; }
 html.dark body { font-weight: 450; }
 
-/* Trust Blue gradient text utility */
-.text-gradient-blue {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+/* Apex gradient text — cyan to indigo */
+.text-gradient-apex {
+  background: linear-gradient(135deg, #00D4FF 0%, #6366F1 60%, #A78BFA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Bento cards — uniform padding/radius, stretchable height */
+/* Legacy alias */
+.text-gradient-blue {
+  background: linear-gradient(135deg, #00D4FF 0%, #6366F1 60%, #A78BFA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bento cards — glassmorphism */
 .bento-card {
   border-radius: 1.5rem;
   border: 1px solid var(--border);
   background: var(--card-2);
   box-shadow: var(--shadow-natural);
-  padding: 2rem; /* p-8 */
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  padding: 2rem;
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
 .bento-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.22);
+  border-color: rgba(0, 212, 255, 0.18);
+  box-shadow: var(--shadow-natural), 0 0 40px var(--glow-cyan);
 }
 
 .bento-kicker {
@@ -109,7 +130,7 @@ html.dark body { font-weight: 450; }
   box-shadow: 0 0 28px color-mix(in srgb, var(--vault-blue) 18%, transparent);
 }
 
-/* "Vault Powering Up" micro-interaction */
+/* "Vault Powering Up" micro-interaction — now cyan/indigo glow */
 .vault-power {
   position: absolute;
   inset: -1px;
@@ -117,13 +138,37 @@ html.dark body { font-weight: 450; }
   opacity: 0;
   transition: opacity 220ms ease;
   background:
-    radial-gradient(120px 60px at 30% 30%, rgba(255, 255, 255, 0.22), transparent 60%),
-    radial-gradient(140px 70px at 70% 70%, rgba(59, 130, 246, 0.35), transparent 62%);
+    radial-gradient(120px 60px at 30% 30%, rgba(0, 212, 255, 0.22), transparent 60%),
+    radial-gradient(140px 70px at 70% 70%, rgba(99, 102, 241, 0.30), transparent 62%);
   pointer-events: none;
   mix-blend-mode: screen;
 }
 
 .group:hover .vault-power { opacity: 1; }
+
+/* Pulsing shield keyframes */
+@keyframes shield-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(0, 212, 255, 0.25), 0 0 40px rgba(0, 212, 255, 0.08); }
+  50% { box-shadow: 0 0 24px rgba(0, 212, 255, 0.45), 0 0 60px rgba(99, 102, 241, 0.18); }
+}
+
+@keyframes shield-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* LivePreview layout-shift prevention */
+.live-preview-container {
+  aspect-ratio: 16 / 10;
+  min-height: 320px;
+}
+
+@media (max-width: 640px) {
+  .live-preview-container {
+    aspect-ratio: auto;
+    min-height: 480px;
+  }
+}
 
 /* Mobile-first bento card adjustments */
 @media (max-width: 640px) {
@@ -142,7 +187,7 @@ html.dark body { font-weight: 450; }
   }
 }
 
-/* Ensure touch targets are at least 44px */
+/* Touch targets */
 @media (pointer: coarse) {
   button, a, select, [role="button"] {
     min-height: 44px;
@@ -159,9 +204,6 @@ html.dark body { font-weight: 450; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .bento-card,
-  .vault-power {
-    transition: none;
-  }
+  .bento-card, .vault-power { transition: none; }
   .bento-card:hover { transform: none; }
 }

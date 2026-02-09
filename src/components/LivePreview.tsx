@@ -140,7 +140,7 @@ export default function LivePreview({
               <button
                 type="button"
                 onClick={onCta}
-                className="group relative mt-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-[0_22px_70px_rgba(59,130,246,0.30)] ring-1 ring-blue-300/30 transition-all hover:brightness-110 sm:rounded-2xl sm:px-6 sm:py-3 sm:text-sm md:mt-0"
+                className="group relative mt-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-[0_22px_70px_rgba(0,212,255,0.25)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110 sm:rounded-2xl sm:px-6 sm:py-3 sm:text-sm md:mt-0"
               >
                 Get Early Access
                 <span className="vault-power" aria-hidden="true" />
@@ -149,7 +149,7 @@ export default function LivePreview({
 
             {/* Split screen */}
             <div
-              className="mt-8 grid gap-5 md:grid-cols-2"
+              className="mt-8 grid gap-5 md:grid-cols-2 live-preview-container"
               onClick={() => {
                 console.log("LivePreview clicked");
                 setIsAnimating(true);
@@ -180,7 +180,7 @@ export default function LivePreview({
                         className={
                           "w-full text-left flex items-center justify-between rounded-lg border px-4 py-3 text-xs font-semibold transition-colors " +
                           (isActive
-                            ? "border-blue-500/25 bg-blue-500/10"
+                            ? "border-cyan-500/25 bg-cyan-500/10"
                             : "border-[var(--border)] bg-white/5 hover:bg-white/8")
                         }
                         style={isActive ? { color: "var(--vault-blue)" } : { color: "var(--muted)" }}
@@ -246,10 +246,10 @@ export default function LivePreview({
                           initial={{ x: 0, opacity: 1, filter: "blur(0px)" }}
                           animate={{ x: typeof window !== 'undefined' && window.innerWidth < 640 ? 120 : 260, opacity: 0, filter: "blur(0.6px)" }}
                           transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                          className="inline-flex items-center gap-2 rounded-lg border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-xs font-semibold"
-                          style={{ color: "var(--vault-blue)", boxShadow: "0 0 40px rgba(59,130,246,0.24)", willChange: "transform, opacity, filter" }}
+                          className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-4 py-3 text-xs font-semibold"
+                          style={{ color: "var(--vault-blue)", boxShadow: "0 0 40px rgba(0,212,255,0.20)", willChange: "transform, opacity, filter" }}
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                           <span className="max-w-[190px] truncate">{doc.name}</span>
                         </motion.div>
                       </motion.div>

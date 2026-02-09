@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Shield Bot Avatar — Solid Version
+       Apex triangle centered on dark circle backdrop -->
+
+  <!-- Dark circle backdrop -->
+  <circle cx="128" cy="128" r="120" fill="#0F172A"/>
+
+  <!-- Left Segment — RISK -->
+  <polygon points="128,48 128,126 70,146" fill="#00D4FF"/>
+
+  <!-- Right Segment — COMPLIANCE -->
+  <polygon points="128,48 128,126 186,146" fill="#6366F1"/>
+
+  <!-- Bottom Segment — GOVERNANCE -->
+  <polygon points="71,149 185,149 128,222" fill="#CBD5E1"/>
+</svg>

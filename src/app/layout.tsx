@@ -59,6 +59,9 @@ export const metadata: Metadata = {
     images: [`${SITE_URL}/og-image.png`],
     creator: "@vaultfill",
   },
+  icons: {
+    icon: "/favicon.svg",
+  },
   other: {
     "security-contact": "security@vaultfill.com",
   },

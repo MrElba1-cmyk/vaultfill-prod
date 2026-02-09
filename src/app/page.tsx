@@ -100,15 +100,22 @@ function Reveal({ children }: { children: React.ReactNode }) {
   );
 }
 
-function VaultLogo() {
+function ApexLogo({ size = 36 }: { size?: number }) {
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-[0_18px_60px_rgba(59,130,246,0.25)] ring-1 ring-blue-300/25">
-      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
-        />
+    <div
+      className="flex items-center justify-center rounded-xl"
+      style={{
+        width: size,
+        height: size,
+        background: 'rgba(0, 212, 255, 0.08)',
+        border: '1px solid rgba(0, 212, 255, 0.15)',
+        boxShadow: '0 0 24px rgba(0, 212, 255, 0.12)',
+      }}
+    >
+      <svg viewBox="0 0 512 512" style={{ width: size * 0.6, height: size * 0.6 }} aria-hidden="true">
+        <polygon points="256,72 256,228 138,268" fill="#00D4FF"/>
+        <polygon points="256,72 256,228 374,268" fill="#6366F1"/>
+        <polygon points="140,272 372,272 256,420" fill="#CBD5E1"/>
       </svg>
     </div>
   );
@@ -122,7 +129,7 @@ export default function Home() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       {/* Clean, stable background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(70%_40%_at_50%_0%,rgba(59,130,246,0.16)_0%,transparent_62%)] opacity-80" />
+        <div className="absolute inset-0 bg-[radial-gradient(70%_40%_at_50%_0%,rgba(0,212,255,0.10)_0%,transparent_62%)] opacity-80" />
         <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(148,163,184,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.18)_1px,transparent_1px)] [background-size:92px_92px] dark:[background-image:linear-gradient(to_right,rgba(226,232,240,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(226,232,240,0.06)_1px,transparent_1px)]" />
       </div>
 
@@ -132,7 +139,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-[14px]">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <VaultLogo />
+            <ApexLogo />
             <div className="leading-tight">
               <div className="text-[13px] font-semibold tracking-wide text-[var(--fg)] sm:text-sm">VaultFill</div>
               <div className="hidden text-[11px] text-[var(--muted-2)] sm:block">Security Questionnaire Automation</div>
@@ -153,7 +160,7 @@ export default function Home() {
                 e.preventDefault();
                 openLeadModal();
               }}
-              className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(59,130,246,0.25)] ring-1 ring-blue-300/30 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
+              className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(0,212,255,0.20)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
             >
               <span className="relative">Get Early Access</span>
               <span className="vault-power" aria-hidden="true" />
@@ -175,10 +182,10 @@ export default function Home() {
             <div>
               <Reveal>
                 <div
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold"
+                  className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold"
                   style={{ color: "var(--vault-blue)" }}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                   Enterprise-grade, evidence-backed automation
                 </div>
               </Reveal>
@@ -207,7 +214,7 @@ export default function Home() {
                       e.preventDefault();
                       openLeadModal();
                     }}
-                    className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_22px_70px_rgba(59,130,246,0.30)] ring-1 ring-blue-300/30 transition-all hover:brightness-110"
+                    className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_22px_70px_rgba(0,212,255,0.25)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110"
                   >
                     Start Free Trial
                     <svg className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
@@ -244,7 +251,7 @@ export default function Home() {
                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-4 shadow-[var(--shadow-natural)] backdrop-blur-[14px] sm:rounded-3xl sm:p-8">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-[var(--fg)]">Security Questionnaire — Draft</div>
-                    <div className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] font-semibold" style={{ color: "var(--vault-blue)" }}>
+                    <div className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold" style={{ color: "var(--vault-blue)" }}>
                       AI Drafting
                     </div>
                   </div>
@@ -271,7 +278,7 @@ export default function Home() {
                         <div className="text-[11px] font-semibold text-[var(--muted-2)]">{item.q}</div>
                         <div className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{item.a}</div>
                         <div className="mt-2.5 flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
+                          <span className="inline-flex items-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
                             {item.cite}
                           </span>
                           <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
@@ -282,7 +289,7 @@ export default function Home() {
                     ))}
                   </div>
 
-                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-blue-500/5 p-3 sm:mt-4 sm:rounded-2xl sm:p-4">
+                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-cyan-500/5 p-3 sm:mt-4 sm:rounded-2xl sm:p-4">
                     <div className="flex items-end justify-between">
                       <div>
                         <div className="text-[11px] font-semibold text-[var(--muted-2)]">Draft completed in</div>
@@ -327,7 +334,7 @@ export default function Home() {
         {/* FEATURES (uniform heights + stagger) */}
         <motion.section id="features" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               Capabilities
             </div>
           </Reveal>
@@ -419,7 +426,7 @@ export default function Home() {
         {/* WORKFLOW - Interactive Demo */}
         <motion.section id="how-it-works" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               Workflow
             </div>
           </Reveal>
@@ -440,7 +447,7 @@ export default function Home() {
         {/* FAQ */}
         <motion.section id="faq" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.16 }}>
           <Reveal>
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               FAQ
             </div>
           </Reveal>
@@ -469,16 +476,12 @@ export default function Home() {
         <footer className="border-t border-[var(--border)] pb-14 pt-10">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-[0_18px_60px_rgba(59,130,246,0.25)] ring-1 ring-blue-300/25">
-                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                </svg>
-              </div>
+              <ApexLogo size={32} />
               <div>
                 <div className="text-sm font-semibold text-[var(--fg)]">VaultFill</div>
                 <div className="text-[11px] text-[var(--muted-2)]">Evidence-backed answers for security questionnaires.</div>
                 <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-3 py-1 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                   Houston-born
                 </div>
               </div>

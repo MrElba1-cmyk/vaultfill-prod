@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Shield Bot Avatar — Glow Version
+       Soft-edge glow for glassmorphism contexts -->
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="outerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="blur"/>
+      <feFlood flood-color="#00D4FF" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark circle backdrop with subtle border glow -->
+  <circle cx="128" cy="128" r="120" fill="#0F172A"/>
+  <circle cx="128" cy="128" r="119" fill="none" stroke="#00D4FF" stroke-width="1" opacity="0.25"/>
+
+  <g filter="url(#outerGlow)">
+    <!-- Left Segment — RISK -->
+    <polygon points="128,48 128,126 70,146" fill="#00D4FF"/>
+
+    <!-- Right Segment — COMPLIANCE -->
+    <polygon points="128,48 128,126 186,146" fill="#6366F1"/>
+
+    <!-- Bottom Segment — GOVERNANCE -->
+    <polygon points="71,149 185,149 128,222" fill="#CBD5E1"/>
+  </g>
+</svg>

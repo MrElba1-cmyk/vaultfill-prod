@@ -27,64 +27,49 @@ const SUGGESTED_QUESTIONS = [
   'How do you handle access controls?',
 ];
 
-/* ─── AI Chatbot SVG Icon ─── */
+/* ─── Apex Shield SVG (glow variant for FAB) ─── */
 
-const ChatBotSVG = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    style={{ display: 'block' }}
-  >
-    {/* Speech bubble body */}
-    <path
-      d="M4 4h16a2 2 0 012 2v10a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-      fill="rgba(59, 130, 246, 0.10)"
-    />
-    {/* AI "brain" dots — three connected nodes */}
-    <circle cx="8" cy="11" r="1.3" fill="currentColor" opacity="0.9" />
-    <circle cx="12" cy="8.5" r="1.3" fill="currentColor" opacity="0.9" />
-    <circle cx="16" cy="11" r="1.3" fill="currentColor" opacity="0.9" />
-    {/* Neural connection lines */}
-    <path
-      d="M9.1 10.4L11 9.1M13 9.1L14.9 10.4M8.5 12.3L11.5 13.5L15.5 12.3"
-      stroke="currentColor"
-      strokeWidth="1.1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      opacity="0.5"
-    />
-    {/* Tiny sparkle — AI indicator */}
-    <path
-      d="M18.5 4.5L19 3.5l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5z"
-      fill="currentColor"
-      opacity="0.7"
-    />
+const ApexShieldGlow = ({ size = 28 }: { size?: number }) => (
+  <svg viewBox="0 0 256 256" width={size} height={size} aria-hidden="true">
+    <defs>
+      <filter id="fabGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feFlood floodColor="#00D4FF" floodOpacity="0.35" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge>
+          <feMergeNode in="shadow"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#fabGlow)">
+      <polygon points="128,48 128,126 70,146" fill="#00D4FF"/>
+      <polygon points="128,48 128,126 186,146" fill="#6366F1"/>
+      <polygon points="71,149 185,149 128,222" fill="#CBD5E1"/>
+    </g>
   </svg>
 );
 
-/* ─── Chatbot avatar used in header ─── */
+/* ─── Chat header avatar ─── */
 
-const ChatBotAvatar = ({ size = 36 }: { size?: number }) => (
+const ShieldBotAvatar = ({ size = 36 }: { size?: number }) => (
   <div
     className="flex shrink-0 items-center justify-center rounded-xl"
     style={{
       width: size,
       height: size,
-      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(96, 165, 250, 0.10) 100%)',
+      background: 'rgba(0, 212, 255, 0.08)',
       backdropFilter: 'blur(14px)',
       WebkitBackdropFilter: 'blur(14px)',
-      border: '1px solid rgba(59, 130, 246, 0.18)',
-      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+      border: '1px solid rgba(0, 212, 255, 0.15)',
+      boxShadow: '0 4px 16px rgba(0, 212, 255, 0.12)',
     }}
   >
-    <ChatBotSVG size={Math.round(size * 0.55)} className="text-[var(--vault-blue)]" />
+    <svg viewBox="0 0 256 256" width={Math.round(size * 0.55)} height={Math.round(size * 0.55)} aria-hidden="true">
+      <polygon points="128,48 128,126 70,146" fill="#00D4FF"/>
+      <polygon points="128,48 128,126 186,146" fill="#6366F1"/>
+      <polygon points="71,149 185,149 128,222" fill="#CBD5E1"/>
+    </svg>
   </div>
 );
 
@@ -233,21 +218,33 @@ export default function FloatingChat() {
 
   return (
     <>
-      {/* ── FAB ── */}
+      {/* ── Pulsing Shield FAB ── */}
       <motion.button
         onClick={() => setIsOpen(prev => !prev)}
         className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full"
         style={{
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.92), rgba(37, 99, 235, 0.88))',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'radial-gradient(circle at 40% 35%, rgba(0, 212, 255, 0.18), rgba(12, 18, 32, 0.92) 70%)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(0, 212, 255, 0.20)',
+          animation: isOpen ? 'none' : 'shield-pulse 2.5s ease-in-out infinite',
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         aria-label={isOpen ? 'Close chat' : 'Open VaultFill AI Assistant'}
       >
+        {/* Expanding ring animation */}
+        {!isOpen && (
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: '1.5px solid rgba(0, 212, 255, 0.30)',
+              animation: 'shield-ring 2.5s ease-out infinite',
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.span
@@ -256,7 +253,7 @@ export default function FloatingChat() {
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="text-lg text-white font-medium select-none"
+              className="text-lg text-cyan-300 font-medium select-none"
             >
               ✕
             </motion.span>
@@ -268,7 +265,7 @@ export default function FloatingChat() {
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <ChatBotSVG size={24} className="text-white drop-shadow-sm" />
+              <ApexShieldGlow size={28} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -276,13 +273,13 @@ export default function FloatingChat() {
         {/* Unread dot */}
         {hasUnread && !isOpen && (
           <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-red-500 ring-2 ring-[var(--bg)]" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg)]" />
           </span>
         )}
       </motion.button>
 
-      {/* ── Panel ── */}
+      {/* ── Glassmorphism Chat Panel ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -296,21 +293,21 @@ export default function FloatingChat() {
               height: 'min(520px, calc(100vh - 8rem))',
               minHeight: '400px',
               background: 'var(--card)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow-natural), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(20px) saturate(1.3)',
+              WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
+              border: '1px solid rgba(0, 212, 255, 0.10)',
+              boxShadow: '0 24px 80px rgba(0, 0, 0, 0.4), 0 0 60px rgba(0, 212, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
             }}
           >
             {/* ── Header ── */}
             <div
               className="flex items-center gap-3 border-b px-4 py-3"
               style={{
-                borderColor: 'var(--border)',
+                borderColor: 'rgba(0, 212, 255, 0.08)',
                 background: 'var(--card-2)',
               }}
             >
-              <ChatBotAvatar size={36} />
+              <ShieldBotAvatar size={36} />
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
                 <p className="text-xs text-[var(--muted-2)] truncate">Security & GRC Support</p>
@@ -346,7 +343,7 @@ export default function FloatingChat() {
                       style={
                         msg.role === 'user'
                           ? {
-                              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                              background: 'linear-gradient(135deg, #00D4FF, #6366F1)',
                               color: 'white',
                               borderBottomRightRadius: '6px',
                             }
@@ -370,7 +367,7 @@ export default function FloatingChat() {
                       style={{ background: 'var(--card-2)', border: '1px solid var(--border)' }}
                     >
                       {[0, 150, 300].map(delay => (
-                        <span key={delay} className="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted-2)]" style={{ animationDelay: `${delay}ms` }} />
+                        <span key={delay} className="inline-block h-1.5 w-1.5 animate-bounce rounded-full" style={{ backgroundColor: '#00D4FF', animationDelay: `${delay}ms` }} />
                       ))}
                     </div>
                   </motion.div>
@@ -388,8 +385,14 @@ export default function FloatingChat() {
                       key={q}
                       onClick={() => sendSuggested(q)}
                       disabled={isLoading}
-                      className="block w-full rounded-xl border px-3.5 py-2.5 text-left text-xs transition-colors hover:border-blue-500/30 disabled:opacity-50"
-                      style={{ background: 'var(--card-2)', borderColor: 'var(--border)', color: 'var(--muted)' }}
+                      className="block w-full rounded-xl border px-3.5 py-2.5 text-left text-xs transition-colors disabled:opacity-50"
+                      style={{
+                        background: 'var(--card-2)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--muted)',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0, 212, 255, 0.25)')}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                     >
                       {q}
                     </button>
@@ -399,7 +402,7 @@ export default function FloatingChat() {
             </div>
 
             {/* ── Input ── */}
-            <div className="border-t px-4 py-3" style={{ borderColor: 'var(--border)', background: 'var(--card-2)' }}>
+            <div className="border-t px-4 py-3" style={{ borderColor: 'rgba(0, 212, 255, 0.08)', background: 'var(--card-2)' }}>
               <form onSubmit={handleSubmit}>
                 <div
                   className="flex items-center gap-2 rounded-xl border px-3.5 py-2"
@@ -421,7 +424,7 @@ export default function FloatingChat() {
                     disabled={!input.trim() || isLoading}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all disabled:opacity-30"
                     style={{
-                      background: input.trim() ? 'linear-gradient(135deg, #3b82f6, #2563eb)' : 'transparent',
+                      background: input.trim() ? 'linear-gradient(135deg, #00D4FF, #6366F1)' : 'transparent',
                       color: input.trim() ? 'white' : 'var(--muted-2)',
                     }}
                   >
