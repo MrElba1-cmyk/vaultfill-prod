@@ -2,6 +2,13 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackEvent } from '../lib/analytics';
+import {
+  type OnboardingState,
+  detectStateFromResponse,
+  canTransition,
+  STATE_LABELS,
+} from '../lib/onboardingStateMachine';
 
 /* ─── Types & constants ─── */
 
@@ -97,6 +104,7 @@ export default function FloatingChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [onboardingState, setOnboardingState] = useState<OnboardingState>('S1');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -125,6 +133,22 @@ export default function FloatingChat() {
     if (isOpen) { setHasUnread(false); setTimeout(() => inputRef.current?.focus(), 100); }
   }, [isOpen]);
 
+  /* Track drop-off when user closes chat between S3 and S6 */
+  const prevOpen = useRef(isOpen);
+  useEffect(() => {
+    if (prevOpen.current && !isOpen) {
+      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6'];
+      if (dropOffStates.includes(onboardingState)) {
+        trackEvent('onboarding.drop_off', {
+          sessionId,
+          lastState: STATE_LABELS[onboardingState],
+          messageCount: messages.length,
+        });
+      }
+    }
+    prevOpen.current = isOpen;
+  }, [isOpen, onboardingState, sessionId, messages.length]);
+
   /* Send */
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -138,7 +162,7 @@ export default function FloatingChat() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-vaultfill-session-id': sessionId },
         body: JSON.stringify({ message: trimmed, messages: messages.slice(-8) }),
       });
       if (!res.ok) throw new Error('Failed');
@@ -184,6 +208,15 @@ export default function FloatingChat() {
         }]);
       }
 
+      // Client-side state detection from the latest assistant message
+      const latestAssistant = [...messages].reverse().find(m => m.role === 'assistant');
+      if (latestAssistant) {
+        const detected = detectStateFromResponse(latestAssistant.content);
+        if (detected && canTransition(onboardingState, detected)) {
+          setOnboardingState(detected);
+        }
+      }
+
       if (!isOpen) setHasUnread(true);
     } catch {
       setMessages(prev => [...prev, {
@@ -209,6 +242,22 @@ export default function FloatingChat() {
     setInput(text);
     setTimeout(() => sendMessage(text), 10);
   }, [sendMessage, isLoading]);
+
+  /* Track drop-off on page unload */
+  useEffect(() => {
+    const handleUnload = () => {
+      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6'];
+      if (dropOffStates.includes(onboardingState)) {
+        trackEvent('onboarding.drop_off', {
+          sessionId,
+          lastState: STATE_LABELS[onboardingState],
+          messageCount: messages.length,
+        });
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [onboardingState, sessionId, messages.length]);
 
   const clearChat = useCallback(() => {
     setMessages([WELCOME_MESSAGE]);
