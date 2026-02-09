@@ -27,9 +27,9 @@ const SUGGESTED_QUESTIONS = [
   'How do you handle access controls?',
 ];
 
-/* ─── Pixel-perfect Shield SVG (no wrapper chrome) ─── */
+/* ─── AI Chatbot SVG Icon ─── */
 
-const ShieldSVG = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
+const ChatBotSVG = ({ size = 20, className = '' }: { size?: number; className?: string }) => (
   <svg
     width={size}
     height={size}
@@ -37,28 +37,41 @@ const ShieldSVG = ({ size = 20, className = '' }: { size?: number; className?: s
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
-    style={{ display: 'block' }} /* remove inline-svg baseline gap */
+    style={{ display: 'block' }}
   >
+    {/* Speech bubble body */}
     <path
-      d="M12 2L3 7V12.18C3 16.95 6.3 21.47 12 23C17.7 21.47 21 16.95 21 12.18V7L12 2Z"
+      d="M4 4h16a2 2 0 012 2v10a2 2 0 01-2 2h-4l-4 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.6"
       strokeLinejoin="round"
       fill="rgba(59, 130, 246, 0.10)"
     />
+    {/* AI "brain" dots — three connected nodes */}
+    <circle cx="8" cy="11" r="1.3" fill="currentColor" opacity="0.9" />
+    <circle cx="12" cy="8.5" r="1.3" fill="currentColor" opacity="0.9" />
+    <circle cx="16" cy="11" r="1.3" fill="currentColor" opacity="0.9" />
+    {/* Neural connection lines */}
     <path
-      d="M9 12L11 14L15 10"
+      d="M9.1 10.4L11 9.1M13 9.1L14.9 10.4M8.5 12.3L11.5 13.5L15.5 12.3"
       stroke="currentColor"
-      strokeWidth="2.2"
+      strokeWidth="1.1"
       strokeLinecap="round"
       strokeLinejoin="round"
+      opacity="0.5"
+    />
+    {/* Tiny sparkle — AI indicator */}
+    <path
+      d="M18.5 4.5L19 3.5l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5z"
+      fill="currentColor"
+      opacity="0.7"
     />
   </svg>
 );
 
-/* ─── Shield avatar used in header ─── */
+/* ─── Chatbot avatar used in header ─── */
 
-const ShieldAvatar = ({ size = 36 }: { size?: number }) => (
+const ChatBotAvatar = ({ size = 36 }: { size?: number }) => (
   <div
     className="flex shrink-0 items-center justify-center rounded-xl"
     style={{
@@ -71,7 +84,7 @@ const ShieldAvatar = ({ size = 36 }: { size?: number }) => (
       boxShadow: '0 4px 16px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
     }}
   >
-    <ShieldSVG size={Math.round(size * 0.5)} className="text-[var(--vault-blue)]" />
+    <ChatBotSVG size={Math.round(size * 0.55)} className="text-[var(--vault-blue)]" />
   </div>
 );
 
@@ -255,7 +268,7 @@ export default function FloatingChat() {
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <ShieldSVG size={24} className="text-white drop-shadow-sm" />
+              <ChatBotSVG size={24} className="text-white drop-shadow-sm" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -297,7 +310,7 @@ export default function FloatingChat() {
                 background: 'var(--card-2)',
               }}
             >
-              <ShieldAvatar size={36} />
+              <ChatBotAvatar size={36} />
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
                 <p className="text-xs text-[var(--muted-2)] truncate">Security & GRC Support</p>
