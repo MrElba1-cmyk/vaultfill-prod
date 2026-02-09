@@ -22,3 +22,15 @@ body {
     radial-gradient(900px 600px at 50% 100%, rgba(16, 185, 129, 0.14), transparent 60%),
     linear-gradient(180deg, #050711 0%, #03040b 100%);
 }
+
+/* Logo wall scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll {
+  animation: scroll 25s linear infinite;
+}
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

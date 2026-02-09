@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     recordMessage(sessionId, 'user', query);
     const { events } = processUserInput(machine, query);
     for (const e of events) {
-      trackEvent(e.event as any, e.payload);
+      trackEvent(e.event as any, e.payload as any);
     }
   }
 
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       // Process assistant response for state transitions
       const { events, piiBlocked } = processAssistantResponse(machine, text);
       for (const e of events) {
-        trackEvent(e.event as any, e.payload);
+        trackEvent(e.event as any, e.payload as any);
       }
 
       if (piiBlocked) {

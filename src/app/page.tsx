@@ -1,5 +1,6 @@
 import TrustBadges from '../components/TrustBadges';
 import SandboxBanner from '../components/SandboxBanner';
+import SocialProof from '../components/SocialProof';
 
 export default function Page() {
   return (
@@ -36,6 +37,9 @@ export default function Page() {
             Every session is anonymous and ephemeral. Your compliance data never leaves your control.
           </p>
         </div>
+
+        {/* Social Proof & Testimonials */}
+        <SocialProof />
 
         {/* Try Prompts */}
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-5">
