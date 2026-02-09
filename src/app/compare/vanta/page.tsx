@@ -2,6 +2,7 @@ import React from 'react';
 
 export const metadata = {
   title: 'VaultFill vs. Vanta: Honest Compliance Automation Comparison',
+,
   description: 'Compare VaultFill's AI-powered, document-native compliance automation with Vanta's integration-heavy approach.',
 };
 
