@@ -18,3 +18,19 @@ model DocumentSection {
 
   @@index([source])
 }
+
+model Lead {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+  userAgent      String?  @map("user_agent")
+  monthlyVolume  String?  @map("monthly_volume")
+  currentProcess String?  @map("current_process")
+  primaryFormats String?  @map("primary_formats")
+  role           String?
+  tier           String?
+  source         String?  @default("web")
+
+  @@map("leads")
+}

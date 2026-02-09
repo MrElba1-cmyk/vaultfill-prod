@@ -1,11 +1,10 @@
 /**
- * Lead Capture Database Layer
+ * Lead Capture Database Layer — Prisma-backed
  * 
- * Uses Vercel Postgres (@vercel/postgres) when POSTGRES_URL is configured.
- * Falls back to append-only JSON file for local dev / hobby plan without DB.
+ * Uses Prisma with PostgreSQL as the primary store.
+ * Falls back to append-only JSON file when DATABASE_URL is not configured.
  * 
  * SECURITY: Lead data is NEVER exposed via public APIs or logs.
- * Only the private admin endpoint can read lead data.
  */
 import { promises as fs } from "fs";
 import path from "path";
@@ -22,74 +21,62 @@ export interface Lead {
   source?: string;
 }
 
-// ---------- Vercel Postgres path ----------
+// ---------- Prisma path ----------
 
-let pgPool: any = null;
-
-async function getPgPool() {
-  if (pgPool) return pgPool;
+async function getPrisma() {
   try {
-    const { createPool } = await import("@vercel/postgres");
-    pgPool = createPool();
-    return pgPool;
+    const { prisma } = await import("./db");
+    return prisma;
   } catch {
     return null;
   }
 }
 
-async function ensureLeadsTable(pool: any) {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS leads (
-      id SERIAL PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      user_agent TEXT,
-      monthly_volume TEXT,
-      current_process TEXT,
-      primary_formats TEXT,
-      role TEXT,
-      tier TEXT,
-      source TEXT DEFAULT 'web',
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `);
+async function upsertLeadPrisma(lead: Lead): Promise<boolean> {
+  const prisma = await getPrisma();
+  if (!prisma) return false;
+
+  await prisma.lead.upsert({
+    where: { email: lead.email },
+    create: {
+      email: lead.email,
+      createdAt: new Date(lead.createdAt),
+      userAgent: lead.ua || null,
+      monthlyVolume: lead.monthlyVolume || null,
+      currentProcess: lead.currentProcess || null,
+      primaryFormats: lead.primaryFormats || null,
+      role: lead.role || null,
+      tier: lead.tier || null,
+      source: lead.source || "web",
+    },
+    update: {
+      userAgent: lead.ua || undefined,
+      monthlyVolume: lead.monthlyVolume || undefined,
+      currentProcess: lead.currentProcess || undefined,
+      primaryFormats: lead.primaryFormats || undefined,
+      role: lead.role || undefined,
+      tier: lead.tier || undefined,
+    },
+  });
+  return true;
 }
 
-async function upsertLeadPg(pool: any, lead: Lead): Promise<boolean> {
-  await ensureLeadsTable(pool);
-  const result = await pool.query(
-    `INSERT INTO leads (email, created_at, user_agent, monthly_volume, current_process, primary_formats, role, tier, source)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     ON CONFLICT (email) DO UPDATE SET
-       user_agent = EXCLUDED.user_agent,
-       monthly_volume = EXCLUDED.monthly_volume,
-       current_process = EXCLUDED.current_process,
-       primary_formats = EXCLUDED.primary_formats,
-       role = EXCLUDED.role,
-       tier = EXCLUDED.tier,
-       updated_at = NOW()
-     RETURNING id`,
-    [
-      lead.email,
-      lead.createdAt,
-      lead.ua || null,
-      lead.monthlyVolume || null,
-      lead.currentProcess || null,
-      lead.primaryFormats || null,
-      lead.role || null,
-      lead.tier || null,
-      lead.source || "web",
-    ]
-  );
-  return result.rowCount > 0;
-}
+async function getAllLeadsPrisma(): Promise<Lead[]> {
+  const prisma = await getPrisma();
+  if (!prisma) return [];
 
-async function getAllLeadsPg(pool: any): Promise<Lead[]> {
-  await ensureLeadsTable(pool);
-  const result = await pool.query(
-    "SELECT email, created_at as \"createdAt\", user_agent as ua, monthly_volume as \"monthlyVolume\", current_process as \"currentProcess\", primary_formats as \"primaryFormats\", role, tier FROM leads ORDER BY created_at DESC"
-  );
-  return result.rows;
+  const rows = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map((r) => ({
+    email: r.email,
+    createdAt: r.createdAt.toISOString(),
+    ua: r.userAgent || undefined,
+    monthlyVolume: r.monthlyVolume || undefined,
+    currentProcess: r.currentProcess || undefined,
+    primaryFormats: r.primaryFormats || undefined,
+    role: r.role || undefined,
+    tier: r.tier || undefined,
+    source: r.source || undefined,
+  }));
 }
 
 // ---------- JSON fallback path ----------
@@ -98,7 +85,7 @@ const LEADS_PATH = path.join(process.cwd(), "data", "leads-secure.json");
 
 async function upsertLeadJson(lead: Lead): Promise<boolean> {
   await fs.mkdir(path.dirname(LEADS_PATH), { recursive: true });
-  
+
   let existing: Lead[] = [];
   try {
     const raw = await fs.readFile(LEADS_PATH, "utf8");
@@ -123,8 +110,8 @@ async function getAllLeadsJson(): Promise<Lead[]> {
 
 // ---------- Public API ----------
 
-function hasPostgres(): boolean {
-  return !!(process.env.POSTGRES_URL || process.env.DATABASE_URL);
+function hasDatabase(): boolean {
+  return !!process.env.DATABASE_URL;
 }
 
 /**
@@ -132,14 +119,11 @@ function hasPostgres(): boolean {
  * Database write happens BEFORE any external notifications.
  */
 export async function saveLead(lead: Lead): Promise<boolean> {
-  if (hasPostgres()) {
-    const pool = await getPgPool();
-    if (pool) {
-      try {
-        return await upsertLeadPg(pool, lead);
-      } catch (err) {
-        console.error("[LeadDB] Postgres write failed, falling back to JSON:", err);
-      }
+  if (hasDatabase()) {
+    try {
+      return await upsertLeadPrisma(lead);
+    } catch (err) {
+      console.error("[LeadDB] Prisma write failed, falling back to JSON:", err);
     }
   }
   return await upsertLeadJson(lead);
@@ -149,14 +133,11 @@ export async function saveLead(lead: Lead): Promise<boolean> {
  * Get all leads (admin only — never expose publicly).
  */
 export async function getAllLeads(): Promise<Lead[]> {
-  if (hasPostgres()) {
-    const pool = await getPgPool();
-    if (pool) {
-      try {
-        return await getAllLeadsPg(pool);
-      } catch (err) {
-        console.error("[LeadDB] Postgres read failed, falling back to JSON:", err);
-      }
+  if (hasDatabase()) {
+    try {
+      return await getAllLeadsPrisma();
+    } catch (err) {
+      console.error("[LeadDB] Prisma read failed, falling back to JSON:", err);
     }
   }
   return await getAllLeadsJson();

@@ -69,8 +69,9 @@ function searchKnowledge(query: string, sections: KnowledgeSection[]): Knowledge
   return scored.map((x) => x.section);
 }
 
-/** Check if vector index exists */
+/** Check if vector search is available (pgvector DB or local JSON index) */
 function hasVectorIndex(): boolean {
+  if (process.env.DATABASE_URL) return true;
   try {
     return fs.existsSync(path.join(process.cwd(), "data", "vector-index.json"));
   } catch { return false; }

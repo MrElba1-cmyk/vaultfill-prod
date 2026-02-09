@@ -15,7 +15,10 @@ if (!OPENAI_API_KEY) {
 }
 
 const prisma = new PrismaClient();
-const DOCS_DIR = path.join(process.cwd(), "docs");
+const DOCS_DIRS = [
+  path.join(process.cwd(), "docs"),
+  path.join(process.cwd(), "data", "sample-vault"),
+];
 const CHUNK_SIZE = 500; // ~500 tokens ≈ 2000 chars
 const EMBEDDING_MODEL = "text-embedding-3-small";
 const BATCH_SIZE = 20; // embeddings per API call
@@ -82,29 +85,33 @@ async function getEmbeddings(texts: string[]): Promise<number[][]> {
 }
 
 async function main() {
-  // Also check data/sample-vault as fallback
-  let docsDir = DOCS_DIR;
-  if (!fs.existsSync(docsDir)) {
-    const fallback = path.join(process.cwd(), "data", "sample-vault");
-    if (fs.existsSync(fallback)) {
-      docsDir = fallback;
-      console.log(`📂 docs/ not found, using fallback: data/sample-vault/`);
-    } else {
-      console.error("No docs/ or data/sample-vault/ directory found");
-      process.exit(1);
+  // Read from all configured directories, dedup by filename
+  const seenFiles = new Set<string>();
+  const allChunks: Chunk[] = [];
+
+  for (const docsDir of DOCS_DIRS) {
+    if (!fs.existsSync(docsDir)) {
+      console.log(`📂 Skipping (not found): ${docsDir}`);
+      continue;
+    }
+    console.log(`📂 Reading files from ${docsDir}...`);
+    const files = fs.readdirSync(docsDir).filter((f) => f.endsWith(".md"));
+    for (const file of files) {
+      if (seenFiles.has(file)) {
+        console.log(`  ⏭️  Skipping duplicate: ${file}`);
+        continue;
+      }
+      seenFiles.add(file);
+      const content = fs.readFileSync(path.join(docsDir, file), "utf-8");
+      const chunks = chunkMarkdown(file, content);
+      allChunks.push(...chunks);
+      console.log(`  ${file}: ${chunks.length} chunks`);
     }
   }
 
-  console.log(`📂 Reading files from ${docsDir}...`);
-  const files = fs.readdirSync(docsDir).filter((f) => f.endsWith(".md"));
-  console.log(`  Found ${files.length} files: ${files.join(", ")}`);
-
-  const allChunks: Chunk[] = [];
-  for (const file of files) {
-    const content = fs.readFileSync(path.join(docsDir, file), "utf-8");
-    const chunks = chunkMarkdown(file, content);
-    allChunks.push(...chunks);
-    console.log(`  ${file}: ${chunks.length} chunks`);
+  if (allChunks.length === 0) {
+    console.error("No markdown files found in any directory");
+    process.exit(1);
   }
 
   console.log(`\n🧩 Total chunks: ${allChunks.length}`);
