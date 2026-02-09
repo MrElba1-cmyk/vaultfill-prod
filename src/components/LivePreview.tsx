@@ -28,7 +28,11 @@ async function getDocumentAnswers(docId: string): Promise<Record<string, string>
   const cached = _answersCache.get(docId);
   if (cached) return cached;
 
-  const response = await fetch(`/api/knowledge?docId=${encodeURIComponent(docId)}`);
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode: "extract", docId }),
+  });
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: Failed to fetch document answers`);
   }
@@ -125,7 +129,7 @@ export default function LivePreview({
                 >
                   Live Preview
                 </div>
-                <h3 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--fg)]">
+                <h3 className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[var(--fg)] sm:text-2xl">
                   Search & Fill — from Knowledge Vault to Questionnaire
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
@@ -136,7 +140,7 @@ export default function LivePreview({
               <button
                 type="button"
                 onClick={onCta}
-                className="group relative mt-4 inline-flex items-center justify-center rounded-2xl bg-gradient-to-b from-blue-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_22px_70px_rgba(59,130,246,0.30)] ring-1 ring-blue-300/30 transition-all hover:brightness-110 md:mt-0"
+                className="group relative mt-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-[0_22px_70px_rgba(59,130,246,0.30)] ring-1 ring-blue-300/30 transition-all hover:brightness-110 sm:rounded-2xl sm:px-6 sm:py-3 sm:text-sm md:mt-0"
               >
                 Get Early Access
                 <span className="vault-power" aria-hidden="true" />
@@ -153,7 +157,7 @@ export default function LivePreview({
               style={{ overflow: "visible" }}
             >
               {/* Left: Knowledge Vault */}
-              <div className="min-h-[320px] rounded-2xl border border-[var(--border)] bg-black/10 p-5">
+              <div className="min-h-[200px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-sm sm:min-h-[320px] sm:rounded-2xl sm:p-5">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-[var(--fg)]">The Knowledge Vault</div>
                   <div className="text-[11px] font-semibold text-[var(--muted-2)]">Encrypted</div>
@@ -174,7 +178,7 @@ export default function LivePreview({
                           window.setTimeout(() => setFilled(true), 420);
                         }}
                         className={
-                          "w-full text-left flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-semibold transition-colors " +
+                          "w-full text-left flex items-center justify-between rounded-lg border px-4 py-3 text-xs font-semibold transition-colors " +
                           (isActive
                             ? "border-blue-500/25 bg-blue-500/10"
                             : "border-[var(--border)] bg-white/5 hover:bg-white/8")
@@ -192,7 +196,7 @@ export default function LivePreview({
               </div>
 
               {/* Right: Questionnaire */}
-              <div className="relative min-h-[340px] rounded-2xl border border-[var(--border)] bg-black/10 p-5">
+              <div className="relative min-h-[220px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-sm sm:min-h-[340px] sm:rounded-2xl sm:p-5">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-[var(--fg)]">The Questionnaire</div>
                   <div className="text-[11px] font-semibold text-[var(--muted-2)]">Auto-fill</div>
@@ -202,7 +206,7 @@ export default function LivePreview({
                   {FIELDS.map((f) => (
                     <div
                       key={f.id}
-                      className="rounded-xl border border-[var(--border)] bg-white/5 px-3 py-2"
+                      className="rounded-lg border border-[var(--border)] bg-white/5 px-4 py-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-xs font-semibold text-[var(--muted)]">{f.label}</div>
@@ -240,9 +244,9 @@ export default function LivePreview({
                       >
                         <motion.div
                           initial={{ x: 0, opacity: 1, filter: "blur(0px)" }}
-                          animate={{ x: 260, opacity: 0, filter: "blur(0.6px)" }}
+                          animate={{ x: typeof window !== 'undefined' && window.innerWidth < 640 ? 120 : 260, opacity: 0, filter: "blur(0.6px)" }}
                           transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                          className="inline-flex items-center gap-2 rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs font-semibold"
+                          className="inline-flex items-center gap-2 rounded-lg border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-xs font-semibold"
                           style={{ color: "var(--vault-blue)", boxShadow: "0 0 40px rgba(59,130,246,0.24)", willChange: "transform, opacity, filter" }}
                         >
                           <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />

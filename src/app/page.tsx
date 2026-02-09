@@ -130,12 +130,12 @@ export default function Home() {
 
       {/* Navigation */}
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <VaultLogo />
             <div className="leading-tight">
-              <div className="text-sm font-semibold tracking-wide text-[var(--fg)]">VaultFill</div>
-              <div className="text-[11px] text-[var(--muted-2)]">Security Questionnaire Automation</div>
+              <div className="text-[13px] font-semibold tracking-wide text-[var(--fg)] sm:text-sm">VaultFill</div>
+              <div className="hidden text-[11px] text-[var(--muted-2)] sm:block">Security Questionnaire Automation</div>
             </div>
           </div>
 
@@ -145,7 +145,7 @@ export default function Home() {
             <a className="transition-colors hover:text-[var(--fg)]" href="#faq">FAQ</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <Link
               href="#"
@@ -153,7 +153,7 @@ export default function Home() {
                 e.preventDefault();
                 openLeadModal();
               }}
-              className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(59,130,246,0.25)] ring-1 ring-blue-300/30 transition-all hover:brightness-110"
+              className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(59,130,246,0.25)] ring-1 ring-blue-300/30 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
             >
               <span className="relative">Get Early Access</span>
               <span className="vault-power" aria-hidden="true" />
@@ -162,16 +162,16 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-6">
+      <main className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         {/* HERO */}
         <motion.section
-          className="pb-18 pt-14 md:pb-20 md:pt-20"
+          className="pb-12 pt-10 sm:pb-16 sm:pt-14 md:pb-20 md:pt-20"
           variants={section}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
         >
-          <div className="grid gap-14 md:grid-cols-2 md:items-center">
+          <div className="grid gap-10 sm:gap-14 md:grid-cols-2 md:items-center">
             <div>
               <Reveal>
                 <div
@@ -184,14 +184,14 @@ export default function Home() {
               </Reveal>
 
               <Reveal>
-                <h1 className="mt-8 text-4xl font-semibold leading-[1.06] tracking-[-0.03em] text-[var(--fg)] md:text-[58px]">
+                <h1 className="mt-6 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[var(--fg)] sm:mt-8 sm:text-4xl md:text-[58px]">
                   Security questionnaires,
                   <span className="text-gradient-blue"> completed at enterprise speed.</span>
                 </h1>
               </Reveal>
 
               <Reveal>
-                <p className="mt-6 max-w-xl text-[15.5px] leading-relaxed text-[var(--muted)] md:text-lg">
+                <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-[var(--muted)] sm:mt-6 sm:text-[15.5px] md:text-lg">
                   Turn policies, audit artifacts, and standard responses into a private Knowledge Vault.
                   VaultFill drafts answers with <span className="font-semibold text-[var(--fg)]">verifiable citations</span> —
                   so reviewers approve in minutes, not weeks.
@@ -199,7 +199,7 @@ export default function Home() {
               </Reveal>
 
               <Reveal>
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="mt-7 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
                   <Link
                     id="get-started"
                     href="#"
@@ -241,7 +241,7 @@ export default function Home() {
 
             <div>
               <Reveal>
-                <div className="rounded-3xl border border-[var(--border)] bg-[var(--card-2)] p-8 shadow-[var(--shadow-natural)] backdrop-blur-xl">
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-4 shadow-[var(--shadow-natural)] backdrop-blur-xl sm:rounded-3xl sm:p-8">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-[var(--fg)]">Security Questionnaire — Draft</div>
                     <div className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] font-semibold" style={{ color: "var(--vault-blue)" }}>
@@ -267,7 +267,7 @@ export default function Home() {
                         cite: "IR-Plan.pdf § Appendix A",
                       },
                     ].map((item) => (
-                      <div key={item.q} className="rounded-2xl border border-[var(--border)] bg-black/15 p-4">
+                      <div key={item.q} className="rounded-xl border border-[var(--border)] bg-black/15 p-3 sm:rounded-2xl sm:p-4">
                         <div className="text-[11px] font-semibold text-[var(--muted-2)]">{item.q}</div>
                         <div className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{item.a}</div>
                         <div className="mt-2.5 flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function Home() {
                     ))}
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-[var(--border)] bg-blue-500/5 p-4">
+                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-blue-500/5 p-3 sm:mt-4 sm:rounded-2xl sm:p-4">
                     <div className="flex items-end justify-between">
                       <div>
                         <div className="text-[11px] font-semibold text-[var(--muted-2)]">Draft completed in</div>
@@ -325,14 +325,14 @@ export default function Home() {
         </motion.section>
 
         {/* FEATURES (uniform heights + stagger) */}
-        <motion.section id="features" className="py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
+        <motion.section id="features" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               Capabilities
             </div>
           </Reveal>
           <Reveal>
-            <h2 className="mt-5 text-3xl font-semibold tracking-[-0.02em] text-[var(--fg)] md:text-4xl">
+            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] text-[var(--fg)] sm:mt-5 sm:text-3xl md:text-4xl">
               Built for speed.
               <br />
               Designed for trust.
@@ -417,14 +417,14 @@ export default function Home() {
         </motion.section>
 
         {/* WORKFLOW - Interactive Demo */}
-        <motion.section id="how-it-works" className="py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
+        <motion.section id="how-it-works" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               Workflow
             </div>
           </Reveal>
           <Reveal>
-            <h2 className="mt-5 text-3xl font-semibold tracking-[-0.02em] text-[var(--fg)] md:text-4xl">Three steps to done.</h2>
+            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] text-[var(--fg)] sm:mt-5 sm:text-3xl md:text-4xl">Three steps to done.</h2>
           </Reveal>
           <Reveal>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--muted)]">
@@ -438,14 +438,14 @@ export default function Home() {
         </motion.section>
 
         {/* FAQ */}
-        <motion.section id="faq" className="py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.16 }}>
+        <motion.section id="faq" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.16 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
               FAQ
             </div>
           </Reveal>
           <Reveal>
-            <h2 className="mt-5 text-3xl font-semibold tracking-[-0.02em] text-[var(--fg)] md:text-4xl">Common questions.</h2>
+            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] text-[var(--fg)] sm:mt-5 sm:text-3xl md:text-4xl">Common questions.</h2>
           </Reveal>
 
           <motion.div

@@ -86,7 +86,7 @@ export default function LeadCaptureModal({
 
           {/* Panel */}
           <motion.div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card-2)] p-8 shadow-[var(--shadow-natural)]"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-5 shadow-[var(--shadow-natural)] sm:rounded-3xl sm:p-8"
             initial={{ opacity: 0, scale: 0.95, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}

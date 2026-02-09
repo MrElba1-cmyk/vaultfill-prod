@@ -105,7 +105,7 @@ export default function LeadModal({
 
           {/* Panel */}
           <motion.div
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card-2)] p-8 shadow-[var(--shadow-natural)]"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-5 shadow-[var(--shadow-natural)] sm:rounded-3xl sm:p-8"
             initial={{ opacity: 0, scale: 0.95, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}
@@ -119,7 +119,7 @@ export default function LeadModal({
                 >
                   Founding Member
                 </div>
-                <h3 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--fg)]">
+                <h3 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[var(--fg)] sm:text-2xl">
                   Join the cohort.
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
@@ -147,7 +147,7 @@ export default function LeadModal({
                     transition={{ duration: 0.18 }}
                     className="space-y-4"
                   >
-                    <div className="grid gap-3">
+                    <div className="grid gap-2.5 sm:gap-3">
                       <div>
                         <label
                           className="text-xs font-semibold text-[var(--muted-2)]"

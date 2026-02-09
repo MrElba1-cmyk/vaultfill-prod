@@ -125,7 +125,40 @@ html.dark body { font-weight: 450; }
 
 .group:hover .vault-power { opacity: 1; }
 
+/* Mobile-first bento card adjustments */
+@media (max-width: 640px) {
+  .bento-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  .bento-icon {
+    height: 38px;
+    width: 38px;
+    border-radius: 12px;
+  }
+  .bento-kicker {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+}
+
+/* Ensure touch targets are at least 44px */
+@media (pointer: coarse) {
+  button, a, select, [role="button"] {
+    min-height: 44px;
+  }
+  select {
+    min-height: 48px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
   .bento-card,
   .vault-power {
     transition: none;
