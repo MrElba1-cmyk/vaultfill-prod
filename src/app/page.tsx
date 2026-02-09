@@ -100,7 +100,7 @@ function Reveal({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ApexLogo({ size = 36 }: { size?: number }) {
+function ApexLogo({ size = 44 }: { size?: number }) {
   return (
     <div
       className="flex items-center justify-center rounded-xl"
@@ -476,7 +476,7 @@ export default function Home() {
         <footer className="border-t border-[var(--border)] pb-14 pt-10">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-3">
-              <ApexLogo size={32} />
+              <ApexLogo size={38} />
               <div>
                 <div className="text-sm font-semibold text-[var(--fg)]">VaultFill</div>
                 <div className="text-[11px] text-[var(--muted-2)]">Evidence-backed answers for security questionnaires.</div>
