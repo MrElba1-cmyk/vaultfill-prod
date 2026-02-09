@@ -4,26 +4,32 @@ import { queryKnowledgeVault } from '../../../lib/embeddings';
 import { getOrCreateSession, recordMessage, getSessionContext } from '../../../lib/sessions';
 import {
   type OnboardingState,
+  type SessionMachine,
+  createSession,
   buildStatePromptFragment,
-  detectStateFromResponse,
-  canTransition,
+  processUserInput,
+  processAssistantResponse,
+  getQuickReplies,
   STATE_LABELS,
-} from '../../../lib/onboardingStateMachine';
+} from '../../../lib/onboarding-state-machine';
 import { trackEvent } from '../../../lib/analytics';
 
 export const runtime = 'nodejs';
 
-// In-memory state store (per session). In production, persist to DB.
-const sessionStates = new Map<string, { state: OnboardingState; messageCount: number }>();
+// In-memory state store. Production: persist to Redis/DB.
+const sessionMachines = new Map<string, SessionMachine>();
 
-function getSessionState(sessionId: string) {
-  if (!sessionStates.has(sessionId)) {
-    sessionStates.set(sessionId, { state: 'S1', messageCount: 0 });
+function getSessionMachine(sessionId: string): SessionMachine {
+  if (!sessionMachines.has(sessionId)) {
+    const machine = createSession(sessionId);
+    sessionMachines.set(sessionId, machine);
+
+    trackEvent('onboarding.session_started' as any, { sessionId });
   }
-  return sessionStates.get(sessionId)!;
+  return sessionMachines.get(sessionId)!;
 }
 
-function buildSystemPrompt(ragContext: string, sessionContext: string, onboardingState: OnboardingState) {
+function buildSystemPrompt(ragContext: string, sessionContext: string, machine: SessionMachine) {
   let base = `You are AI Assistant for VaultFill.
 
 You help users answer and interpret security questionnaires and GRC requests (SOC 2, ISO 27001, NIST CSF/800-53, vendor due diligence). You are concise, practical, and you ask clarifying questions when needed.
@@ -41,8 +47,7 @@ Response style:
 - If the user asks for something you cannot confirm (e.g., their actual environment), state assumptions.
 `;
 
-  // Inject onboarding state machine instructions
-  base += buildStatePromptFragment(onboardingState);
+  base += buildStatePromptFragment(machine.state, machine.memory);
 
   if (sessionContext) {
     base += `\n${sessionContext}\n`;
@@ -59,66 +64,42 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
   const sessionId = req.headers.get('x-vaultfill-session-id') || 'anonymous';
 
-  // Track session
+  // Session tracking
   getOrCreateSession(sessionId);
-  const ss = getSessionState(sessionId);
-  ss.messageCount++;
-
-  // Auto-advance S1→S2 on first user message
-  if (ss.state === 'S1' && ss.messageCount >= 1) {
-    ss.state = 'S2';
-  }
+  const machine = getSessionMachine(sessionId);
 
   const lastUser = [...messages].reverse().find((m: any) => m.role === 'user');
   const query = typeof lastUser?.content === 'string' ? lastUser.content : '';
 
-  // Record the user message
-  if (query) recordMessage(sessionId, 'user', query);
+  // Record & process user input
+  if (query) {
+    recordMessage(sessionId, 'user', query);
+    const { events } = processUserInput(machine, query);
+    for (const e of events) {
+      trackEvent(e.event as any, e.payload);
+    }
+  }
 
-  // Semantic RAG via embeddings
+  // Semantic RAG
   const ragContext = query ? await queryKnowledgeVault(query) : '';
   const sessionContext = getSessionContext(sessionId);
 
   const result = streamText({
     model: openai('gpt-4o-mini'),
-    system: buildSystemPrompt(ragContext, sessionContext, ss.state),
+    system: buildSystemPrompt(ragContext, sessionContext, machine),
     messages,
     temperature: 0.2,
     onFinish: ({ text }) => {
       recordMessage(sessionId, 'assistant', text);
 
-      // Detect state transition from LLM response
-      const detectedState = detectStateFromResponse(text);
-      if (detectedState && canTransition(ss.state, detectedState)) {
-        const fromState = ss.state;
-        ss.state = detectedState;
-
-        // Fire analytics events
-        if (detectedState === 'S3') {
-          trackEvent('onboarding.demo_initiated', {
-            sessionId,
-            fromState: STATE_LABELS[fromState],
-          });
-        }
-        if (detectedState === 'S7') {
-          trackEvent('onboarding.lead_captured', {
-            sessionId,
-            fromState: STATE_LABELS[fromState],
-          });
-        }
+      // Process assistant response for state transitions
+      const { events, piiBlocked } = processAssistantResponse(machine, text);
+      for (const e of events) {
+        trackEvent(e.event as any, e.payload);
       }
 
-      // Heuristic: if LLM mentioned a pain point and we're in S2, advance to S3
-      if (ss.state === 'S2' && (
-        text.toLowerCase().includes('let me show you') ||
-        text.toLowerCase().includes('here\'s an example') ||
-        text.toLowerCase().includes('for instance')
-      )) {
-        ss.state = 'S3';
-        trackEvent('onboarding.demo_initiated', {
-          sessionId,
-          fromState: STATE_LABELS['S2'],
-        });
+      if (piiBlocked) {
+        console.warn(`[guardrail] PII solicitation blocked in state ${machine.state} for session ${sessionId}`);
       }
     },
   });
