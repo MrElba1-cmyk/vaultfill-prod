@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://vaultfill.com/sitemap.xml
 Disallow: /api/
 Disallow: /_next/
 
