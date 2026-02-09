@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ModalProvider } from "@/contexts/ModalContext";
-import ChatWidget from "@/components/ChatWidget";
+import FloatingChat from "@/components/FloatingChat";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -73,7 +73,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ModalProvider>
             {children}
-            <ChatWidget />
+            <FloatingChat />
           </ModalProvider>
         </ThemeProvider>
       </body>
