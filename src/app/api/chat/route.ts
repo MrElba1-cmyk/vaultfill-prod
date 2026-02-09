@@ -56,8 +56,20 @@ Response style:
 }
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-  const sessionId = req.headers.get('x-vaultfill-session-id') || 'anonymous';
+  try {
+    const body = await req.json();
+    // Accept both client formats:
+    // - { messages: [{role, content}, ...] } (Vercel AI SDK style)
+    // - { message: "..." } (simple test / legacy)
+    const incomingMessages = Array.isArray(body?.messages) ? body.messages : null;
+    const singleMessage = typeof body?.message === 'string' ? body.message : null;
+
+    const messages = incomingMessages ?? (singleMessage ? [{ role: 'user', content: singleMessage }] : []);
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(null, { status: 400 });
+    }
+
+    const sessionId = req.headers.get('x-vaultfill-session-id') || 'anonymous';
 
   // Track session
   getOrCreateSession(sessionId);
@@ -123,5 +135,9 @@ export async function POST(req: Request) {
     },
   });
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse();
+  } catch (err) {
+    // Avoid leaking internals; just return 500.
+    return new Response(null, { status: 500 });
+  }
 }

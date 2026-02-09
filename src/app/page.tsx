@@ -9,6 +9,12 @@ import LeadModal from "@/components/LeadModal";
 import LivePreview from "@/components/LivePreview";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import WorkflowDemo from "@/components/WorkflowDemo";
+import SandboxBanner from "@/components/SandboxBanner";
+import TrustBadges from "@/components/TrustBadges";
+import PrivacyPromise from "@/components/PrivacyPromise";
+import SocialProof from "@/components/SocialProof";
+import TryItCTA from "@/components/TryItCTA";
+import FloatingChat from "@/components/FloatingChat";
 import { useModal } from "@/contexts/ModalContext";
 
 const complianceBadges = ["SOC 2 Type II", "ISO 27001", "GDPR", "AES-256"];
@@ -170,7 +176,12 @@ export default function Home() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        {/* HERO */}
+        {/* 1 · SANDBOX BANNER */}
+        <div className="pt-4">
+          <SandboxBanner />
+        </div>
+
+        {/* 2 · HERO */}
         <motion.section
           className="pb-12 pt-10 sm:pb-16 sm:pt-14 md:pb-20 md:pt-20"
           variants={section}
@@ -308,29 +319,20 @@ export default function Home() {
           </div>
         </motion.section>
 
+        {/* 3 · SECURITY TRUST CARDS */}
+        <div className="pb-14">
+          <TrustBadges />
+        </div>
+
+        {/* 4 · LIVE QUESTIONNAIRE DEMO */}
         <ErrorBoundary>
           <LivePreview onCta={openLeadModal} />
         </ErrorBoundary>
 
-        {/* TRUSTED BY */}
-        <motion.section className="border-y border-[var(--border)] py-10" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.25 }}>
-          <Reveal>
-            <p className="text-center text-xs font-semibold uppercase tracking-[0.28em] text-[var(--muted-2)]">
-              Trusted by forward-thinking teams
-            </p>
-          </Reveal>
-          <Reveal>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-12 gap-y-5 opacity-85">
-              {["Acme Corp", "TechVault", "SecureStack", "CloudGuard", "DataShield"].map((name) => (
-                <div key={name} className="text-sm font-semibold tracking-wide text-[var(--muted)]">
-                  {name}
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </motion.section>
+        {/* 5 · PRIVACY PROMISE */}
+        <PrivacyPromise />
 
-        {/* FEATURES (uniform heights + stagger) */}
+        {/* 6+7 · KNOWLEDGE VAULT + CAPABILITIES */}
         <motion.section id="features" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
@@ -443,7 +445,10 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* FAQ */}
+        {/* 9 · SOCIAL PROOF */}
+        <SocialProof />
+
+        {/* 10 · FAQ */}
         <motion.section id="faq" className="py-14 sm:py-20 md:py-24" variants={section} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.16 }}>
           <Reveal>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold" style={{ color: "var(--vault-blue)" }}>
@@ -472,6 +477,10 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
+        {/* 11 · TRY IT CTA */}
+        <TryItCTA />
+
+        {/* 12 · FOOTER */}
         <footer className="border-t border-[var(--border)] pb-14 pt-10">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-3">
@@ -494,6 +503,9 @@ export default function Home() {
           </div>
         </footer>
       </main>
+
+      {/* 13 · FLOATING CHAT */}
+      <FloatingChat />
     </div>
   );
 }

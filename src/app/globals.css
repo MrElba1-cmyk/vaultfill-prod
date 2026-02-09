@@ -146,6 +146,12 @@ html.dark body { font-weight: 450; }
 
 .group:hover .vault-power { opacity: 1; }
 
+/* Infinite scroll ticker */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Pulsing shield keyframes */
 @keyframes shield-pulse {
   0%, 100% { box-shadow: 0 0 16px rgba(0, 212, 255, 0.25), 0 0 40px rgba(0, 212, 255, 0.08); }
