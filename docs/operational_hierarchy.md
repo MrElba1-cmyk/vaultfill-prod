@@ -1,46 +1,109 @@
 # Operational Hierarchy: VaultFill Project
 
-This document outlines the current chain of command, Metis's audit protocol, and the cost-optimization status for the VaultFill project, ensuring clarity and strategic alignment.
+This document outlines the chain of command, agent interactions, decision-making flow, and cost-optimization strategy for the VaultFill project.
 
-## 1. Current 'Chain of Command'
+---
 
-*   **Founder (Abdul):** Ultimate authority, strategic vision, and final decision-maker for all Project Sovereign initiatives.
+## 1. Chain of Command
 
-*   **Zeus (Main Agent):** The central orchestrator and project manager. Zeus receives directives from the Founder, delegates tasks to specialized sub-agents, manages inter-agent communication, consolidates reports, and ensures overall project momentum. Zeus acts as the primary interface between the Founder and the specialized agents.
+### Founder (Abdul)
+- Ultimate authority, strategic vision, final decision-maker
+- Sets priorities, approves major architectural changes, controls budget
 
-*   **Metis (Systems Architect Agent):** Strategic advisor to Zeus and other agents. Metis focuses on systems thinking, strategic scaling, infrastructure planning, and designing blueprints for the entire VaultFill ecosystem. Its role is to ensure all efforts align with a scalable, automated, product-led business model.
+### Zeus (Main Agent — Orchestrator)
+- Central project manager receiving directives from the Founder
+- Delegates tasks to specialized agents, manages inter-agent communication
+- Consolidates reports, ensures project momentum
+- Primary interface between Founder and all specialized agents
 
-*   **Technical Agent:** Responsible for technical implementation, building new components (e.g., AI chat, error buffer), fixing technical issues, and deploying code to production.
+### Metis (Systems Architect Agent)
+- Strategic advisor for systems thinking, scaling, and infrastructure
+- Designs blueprints for the VaultFill ecosystem
+- Engaged at phase milestones and critical architectural decisions (not daily ops)
+- Ensures all efforts align with a scalable, automated, product-led model
 
-*   **Creative Director Agent:** Responsible for all UI/UX design, mobile responsiveness, animation refinement, and ensuring the VaultFill brand aesthetic and premium feel are consistently applied across the product.
+### Technical Agent
+- Implements features (API routes, database schemas, AI chat, evidence processing)
+- Fixes bugs, deploys code, manages CI/CD pipeline
+- Owns: Next.js app, Prisma schema, API routes, Vercel deployment
 
-*   **Sales & Marketing Agent:** Focuses on developing outreach strategies, generating leads, tracking the sales funnel, and creating marketing assets.
+### Creative Director Agent
+- UI/UX design, mobile responsiveness, animations
+- Brand consistency and premium aesthetic across all surfaces
 
-## 2. 'Audit Protocol' for Metis
+### Sales & Marketing Agent
+- Outreach strategy, lead generation, funnel tracking
+- Marketing assets and competitive intelligence
 
-Metis's engagement is strategically triggered for high-level architectural oversight, not day-to-day operations.
+---
 
-**METIS ENGAGEMENT TRIGGERS:**
-1.  **Project Kickoff:** Initial system architecture audit.
-2.  **Phase Milestones:** Review at the end of each major project phase (e.g., MVP complete, beta launch, v1.0 release).
-3.  **Project Completion:** Final audit and scale-ready recommendations.
-4.  **Critical Issues:** Only on-demand for architectural emergencies or severe systemic deviations.
+## 2. System Components & Agent Ownership
+
+| Component | Owner | Technology |
+|---|---|---|
+| Frontend (Landing + Chat) | Creative / Technical | Next.js 16, React 19, Framer Motion, Tailwind |
+| Shield Bot (AI Chat API) | Technical | Vercel AI SDK, OpenAI GPT, `/api/chat` |
+| Lead Capture & CRM | Technical / Sales | `/api/leads`, Prisma + PostgreSQL |
+| Knowledge Base & RAG | Technical | pgvector, `/api/knowledge`, vector-search |
+| Evidence Upload | Technical | `/api/evidence/upload`, PDF parsing |
+| Health Monitoring | Technical | `/api/cron/health` (daily), Telegram alerts |
+| Email (Transactional) | Technical | SendGrid (contact@vaultfill.com) |
+| Alerting | Technical | Telegram Bot API |
+| Hosting & CI/CD | Technical | Vercel (auto-deploy from Git) |
+| Database | Technical | Vercel Postgres (PostgreSQL + pgvector) |
+
+---
+
+## 3. Decision-Making Flow
+
+```
+Founder (Abdul)
+    │
+    ▼
+Zeus (Orchestrator)
+    │
+    ├──► Metis (Architecture reviews at milestones)
+    │       │
+    │       └──► Strategic blueprints feed back to Zeus
+    │
+    ├──► Technical Agent (implementation)
+    │       │
+    │       └──► Code → Git → Vercel auto-deploy
+    │
+    ├──► Creative Director (design)
+    │       │
+    │       └──► UI specs → Technical Agent implements
+    │
+    └──► Sales & Marketing (growth)
+            │
+            └──► Lead data → Technical Agent integrates
+```
+
+**Escalation path:** Agent → Zeus → Founder (for budget/strategic decisions)
+
+---
+
+## 4. Metis Engagement Protocol
+
+**TRIGGERS:**
+1. Project kickoff — initial architecture audit
+2. Phase milestones — end of MVP, beta, v1.0
+3. Project completion — final audit & scale-ready recommendations
+4. Critical issues — architectural emergencies only (on-demand)
 
 **METIS DOES NOT:**
-*   Participate in daily/weekly tasks or routine operations.
-*   Auto-wake for routine checks; its engagement is explicit and event-driven.
-*   Handle tactical execution; this remains the purview of Zeus and the specialized agents.
+- Participate in daily/weekly routine operations
+- Auto-wake for routine checks
+- Handle tactical execution (that's Zeus + specialized agents)
 
-Metis provides strategic blueprints and high-level recommendations to Zeus, who then delegates implementation to the relevant technical, creative, or other specialized agents. Metis's role is to ensure systemic integrity, scalability, and strategic alignment, not granular execution.
+---
 
-## 3. 'Cost-Optimization' Status
+## 5. Cost Optimization
 
 **Status:** Optimized and Maintained.
 
-The current operational model promotes cost optimization by enabling Creative and Technical agents to iterate largely independently within their specialized domains, guided by Zeus's delegation of Metis's high-level strategic blueprints. This approach:
-
-*   **Reduces Redundancy:** Prevents Metis (a higher-cost model, `opus`) from being involved in granular implementation details.
-*   **Streamlines Execution:** Allows specialized agents to focus on their core competencies without constant top-down micro-management.
-*   **Minimizes Context Switching:** Agents receive clear, actionable directives from Zeus (derived from Metis's strategic output) rather than needing Metis to interpret every granular step.
-
-Metis's role is primarily to define the 'what' and 'why' at a systems level, and to continuously audit for systemic integrity and alignment, thereby enabling the technical and creative agents to efficiently determine the 'how' within those established constraints. This separation of concerns ensures efficient resource allocation and reduces overall LLM/tool cost.
+- **Metis (opus)** reserved for high-level architecture — reduces expensive model usage
+- **Specialized agents** iterate independently within their domains
+- **Zeus** translates Metis blueprints into actionable directives
+- **Separation of concerns** minimizes context switching and redundant LLM calls
+- Metis defines the *what* and *why*; execution agents determine the *how*
