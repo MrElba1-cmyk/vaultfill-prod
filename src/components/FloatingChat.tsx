@@ -16,7 +16,7 @@ const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
   content:
-    "Welcome to VaultFill Technical Support. I can help you with SOC 2, ISO 27001, encryption, access controls, GDPR compliance, and how VaultFill automates security questionnaires. How can I assist you today?",
+    "Welcome to VaultFill — private and anonymous. This session is not tracked or stored. I can help with SOC 2, ISO 27001, encryption, access controls, and security questionnaires. How can I assist you?",
   timestamp: new Date(),
 };
 
@@ -313,7 +313,7 @@ export default function FloatingChat() {
               <ChatBotAvatar size={36} />
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
-                <p className="text-xs text-[var(--muted-2)] truncate">Security & GRC Support</p>
+                <p className="text-xs text-[var(--muted-2)] truncate">Private · Anonymous · No tracking</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -430,7 +430,7 @@ export default function FloatingChat() {
                 </div>
               </form>
               <p className="mt-2 text-center text-[10px] text-[var(--muted-2)]">
-                Powered by VaultFill Knowledge Vault
+                🔒 Private session · No data stored · VaultFill Autonomous Systems
               </p>
             </div>
           </motion.div>
