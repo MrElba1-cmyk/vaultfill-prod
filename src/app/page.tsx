@@ -129,7 +129,7 @@ export default function Home() {
       <LeadModal open={isLeadModalOpen} onClose={closeLeadModal} />
 
       {/* Navigation */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-[14px]">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <VaultLogo />
@@ -241,7 +241,7 @@ export default function Home() {
 
             <div>
               <Reveal>
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-4 shadow-[var(--shadow-natural)] backdrop-blur-xl sm:rounded-3xl sm:p-8">
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-4 shadow-[var(--shadow-natural)] backdrop-blur-[14px] sm:rounded-3xl sm:p-8">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-[var(--fg)]">Security Questionnaire — Draft</div>
                     <div className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-[11px] font-semibold" style={{ color: "var(--vault-blue)" }}>

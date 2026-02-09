@@ -33,8 +33,8 @@ const ShieldIcon = ({ className = "", glowing = false }: { className?: string; g
       background: glowing 
         ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(96, 165, 250, 0.15) 100%)'
         : 'rgba(59, 130, 246, 0.12)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)',
       border: '1px solid rgba(59, 130, 246, 0.2)',
       boxShadow: glowing 
         ? '0 0 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
@@ -288,8 +288,8 @@ export default function ChatWidget() {
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-lg transition-all duration-300"
         style={{
           background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(96, 165, 250, 0.8))',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
           boxShadow: '0 8px 32px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
@@ -345,8 +345,8 @@ export default function ChatWidget() {
               height: 'min(520px, calc(100vh - 140px))',
               minHeight: '400px',
               background: 'var(--card)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
               border: '1px solid var(--border)',
               boxShadow: 'var(--shadow-natural), 0 0 0 1px rgba(255, 255, 255, 0.05)',
             }}
@@ -357,7 +357,7 @@ export default function ChatWidget() {
               style={{
                 borderColor: 'var(--border)',
                 background: 'var(--card-2)',
-                backdropFilter: 'blur(16px)',
+                backdropFilter: 'blur(14px)',
               }}
             >
               <ShieldIcon className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl shrink-0" />
@@ -405,7 +405,7 @@ export default function ChatWidget() {
                               border: '1px solid var(--border)',
                               color: 'var(--fg)',
                               borderBottomLeftRadius: '6px',
-                              backdropFilter: 'blur(8px)',
+                              backdropFilter: 'blur(14px)',
                             }
                       }
                     >

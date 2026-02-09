@@ -35,7 +35,7 @@ export default function ThemeToggle() {
     return (
       <div
         aria-hidden="true"
-        className="h-11 w-[88px] rounded-xl border border-white/10 bg-white/5 backdrop-blur-md sm:h-10"
+        className="h-11 w-[88px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] backdrop-blur-[14px] sm:h-10"
       />
     );
   }
@@ -48,7 +48,7 @@ export default function ThemeToggle() {
       type="button"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="group relative inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-semibold text-zinc-200 shadow-sm backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:h-10"
+      className="group relative inline-flex h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card-2)] px-3 text-xs font-semibold text-[var(--muted)] shadow-sm backdrop-blur-[14px] transition-all hover:border-[color-mix(in_srgb,var(--border)_100%,var(--fg)_8%)] hover:bg-[var(--card)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:h-10"
     >
       <span
         className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-b from-blue-500/18 to-transparent text-blue-400 ring-1 ring-blue-400/18 transition-all group-hover:from-blue-500/22"

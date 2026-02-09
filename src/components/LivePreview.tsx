@@ -157,7 +157,7 @@ export default function LivePreview({
               style={{ overflow: "visible" }}
             >
               {/* Left: Knowledge Vault */}
-              <div className="min-h-[200px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-sm sm:min-h-[320px] sm:rounded-2xl sm:p-5">
+              <div className="min-h-[200px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-[14px] sm:min-h-[320px] sm:rounded-2xl sm:p-5">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-[var(--fg)]">The Knowledge Vault</div>
                   <div className="text-[11px] font-semibold text-[var(--muted-2)]">Encrypted</div>
@@ -196,7 +196,7 @@ export default function LivePreview({
               </div>
 
               {/* Right: Questionnaire */}
-              <div className="relative min-h-[220px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-sm sm:min-h-[340px] sm:rounded-2xl sm:p-5">
+              <div className="relative min-h-[220px] rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-3 backdrop-blur-[14px] sm:min-h-[340px] sm:rounded-2xl sm:p-5">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-[var(--fg)]">The Questionnaire</div>
                   <div className="text-[11px] font-semibold text-[var(--muted-2)]">Auto-fill</div>
