@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { streamText, generateText } from 'ai';
 import {
   queryKnowledgeVaultStructured,
   extractSectionFromChunk,
@@ -358,64 +358,71 @@ export async function POST(req: Request) {
     const retrievalSummary = buildRetrievalSummary(ragResults);
     const sessionContext = getSessionContext(sessionId);
 
-    const result = streamText({
+    // DEBUG: Log environment availability
+    console.log(`[chat] OPENAI_API_KEY present: ${!!process.env.OPENAI_API_KEY}, length: ${process.env.OPENAI_API_KEY?.length ?? 0}`);
+
+    const systemPrompt = buildSystemPrompt(
+      ragContext,
+      ragResults,
+      sessionContext,
+      ss,
+      detectedContexts,
+      noRepeatInstructions,
+      retrievalSummary,
+    );
+
+    console.log(`[chat] System prompt length: ${systemPrompt.length}`);
+    console.log(`[chat] Messages count: ${messages.length}`);
+
+    // DIAGNOSTIC MODE: Use generateText to catch errors, then return as plain text
+    // This will reveal the actual error instead of silently returning empty stream
+    console.log(`[chat] About to call generateText with model gpt-4o-mini`);
+
+    const genResult = await generateText({
       model: openai('gpt-4o-mini'),
-      system: buildSystemPrompt(
-        ragContext,
-        ragResults,
-        sessionContext,
-        ss,
-        detectedContexts,
-        noRepeatInstructions,
-        retrievalSummary,
-      ),
+      system: systemPrompt,
       messages,
-      temperature: 0.5, // Increased temperature for less stuck responses
-      onFinish: ({ text }) => {
-        recordMessage(sessionId, 'assistant', text);
-
-        // Update conversation tracker with what the bot said
-        updateFromBotResponse(sessionId, text);
-
-        // Detect state transition from LLM response (HTML comment tags)
-        const detectedState = detectStateFromResponse(text);
-        if (detectedState && canTransition(ss.state, detectedState)) {
-          const fromState = ss.state;
-          ss.state = detectedState;
-
-          if (detectedState === 'S3') {
-            trackEvent('onboarding.demo_initiated', {
-              sessionId,
-              fromState: STATE_LABELS[fromState],
-            });
-          }
-          if (detectedState === 'S7') {
-            trackEvent('onboarding.lead_captured', {
-              sessionId,
-              fromState: STATE_LABELS[fromState],
-            });
-          }
-        }
-
-        // Heuristic: if LLM demonstrated capability while in S3, advance to S4
-        if (
-          ss.state === 'S3' &&
-          (text.toLowerCase().includes('let me show you') ||
-            text.toLowerCase().includes("here's an example") ||
-            text.toLowerCase().includes('for instance') ||
-            text.toLowerCase().includes('suggested response') ||
-            text.toLowerCase().includes('based on ['))
-        ) {
-          ss.state = 'S4';
-          trackEvent('onboarding.value_phase', {
-            sessionId,
-            fromState: STATE_LABELS['S3'],
-          });
-        }
-      },
+      temperature: 0.5,
     });
 
-    return result.toTextStreamResponse();
+    const generatedText = genResult.text;
+    console.log(`[chat] generateText succeeded, text length: ${generatedText.length}`);
+
+    // Record the response
+    recordMessage(sessionId, 'assistant', generatedText);
+    updateFromBotResponse(sessionId, generatedText);
+
+    // Detect state transition from response
+    const detectedState = detectStateFromResponse(generatedText);
+    if (detectedState && canTransition(ss.state, detectedState)) {
+      const fromState = ss.state;
+      ss.state = detectedState;
+      if (detectedState === 'S3') {
+        trackEvent('onboarding.demo_initiated', { sessionId, fromState: STATE_LABELS[fromState] });
+      }
+      if (detectedState === 'S7') {
+        trackEvent('onboarding.lead_captured', { sessionId, fromState: STATE_LABELS[fromState] });
+      }
+    }
+
+    // Heuristic: if LLM demonstrated capability while in S3, advance to S4
+    if (
+      ss.state === 'S3' &&
+      (generatedText.toLowerCase().includes('let me show you') ||
+        generatedText.toLowerCase().includes("here's an example") ||
+        generatedText.toLowerCase().includes('for instance') ||
+        generatedText.toLowerCase().includes('suggested response') ||
+        generatedText.toLowerCase().includes('based on ['))
+    ) {
+      ss.state = 'S4';
+      trackEvent('onboarding.value_phase', { sessionId, fromState: STATE_LABELS['S3'] });
+    }
+
+    // Return as plain text (matches what toTextStreamResponse would produce)
+    return new Response(generatedText, {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     console.error('Chat API error:', error.message, error.stack);
