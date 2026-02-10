@@ -112,12 +112,97 @@ else
   echo "✅ At least one response correctly used the security-clearance fallback"
 fi
 
+# ═══════════════════════════════════════════════════════════════════════════
+# EMAIL INTERCEPT TESTS — verify no fabricated addresses
+# ═══════════════════════════════════════════════════════════════════════════
+
+echo ""
+echo "=== Email Intercept Tests ==="
+
+# Helper: send chat messages and return body
+email_chat() {
+  local payload="$1"
+  local session="email-test-$$-${RANDOM}"
+  curl -s -X POST "${ENDPOINT}" \
+    -H "Content-Type: application/json" \
+    -H "x-vaultfill-session-id: ${session}" \
+    -d "$payload" \
+    --max-time 30 2>/dev/null || echo ""
+}
+
+assert_contains() {
+  local label="$1" body="$2" needle="$3"
+  if echo "$body" | grep -qi "$needle"; then
+    echo "  ✅ ${label} — contains '${needle}'"
+    PASS=$((PASS + 1))
+  else
+    echo "  ❌ ${label} — expected to contain '${needle}'"
+    FAILED_DETAILS+=("Email: ${label} — missing '${needle}'")
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+assert_not_contains() {
+  local label="$1" body="$2" needle="$3"
+  if echo "$body" | grep -qi "$needle"; then
+    echo "  ❌ ${label} — should NOT contain '${needle}'"
+    FAILED_DETAILS+=("Email: ${label} — unexpected '${needle}'")
+    FAIL=$((FAIL + 1))
+  else
+    echo "  ✅ ${label} — does not contain '${needle}'"
+    PASS=$((PASS + 1))
+  fi
+}
+
+# -- E1: Email after CTA → signup confirmation --
+echo ""
+echo "--- E1: Email after CTA → signup confirmation ---"
+E1_BODY=$(email_chat '{
+  "messages": [
+    {"role":"assistant","content":"Great question! Want me to set up a quick pilot for you? Just drop your email and I will get you started."},
+    {"role":"user","content":"Sure! jane@example.com"}
+  ]
+}')
+
+assert_contains    "signup confirmation"        "$E1_BODY" "signed up"
+assert_contains    "asks for company"           "$E1_BODY" "company"
+assert_not_contains "no security@ fabricated"   "$E1_BODY" "security@"
+assert_not_contains "no privacy@ fabricated"    "$E1_BODY" "privacy@"
+
+# -- E2: Bare email with signup intent --
+echo ""
+echo "--- E2: Bare email with 'sign me up' ---"
+E2_BODY=$(email_chat '{
+  "messages": [
+    {"role":"user","content":"Sign me up — my email is bob@acme.co"}
+  ]
+}')
+
+assert_contains    "signup confirmation"        "$E2_BODY" "signed up"
+assert_contains    "asks for company"           "$E2_BODY" "company"
+assert_not_contains "no security@ fabricated"   "$E2_BODY" "security@"
+assert_not_contains "no privacy@ fabricated"    "$E2_BODY" "privacy@"
+
+# -- E3: Email with unclear intent → clarifying question --
+echo ""
+echo "--- E3: Email with no clear intent → clarifying question ---"
+E3_BODY=$(email_chat '{
+  "messages": [
+    {"role":"user","content":"Here is an email I found: admin@somevendor.com — can you look into this?"}
+  ]
+}')
+
+assert_contains    "asks clarification"         "$E3_BODY" "sign up"
+assert_not_contains "no security@ fabricated"   "$E3_BODY" "security@"
+assert_not_contains "no privacy@ fabricated"    "$E3_BODY" "privacy@"
+
 # Cleanup
 rm -f /tmp/shieldbot_response_*.txt
 
 echo ""
 echo "=== Results ==="
-echo "Passed: ${PASS}/5 individual checks"
+TOTAL_CHECKS=$((PASS + FAIL))
+echo "Passed: ${PASS}/${TOTAL_CHECKS} checks"
 if [[ "$FAIL" -gt 0 ]]; then
   echo "FAILED: ${FAIL} check(s)"
   echo ""

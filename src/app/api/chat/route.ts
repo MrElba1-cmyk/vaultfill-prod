@@ -26,6 +26,13 @@ import {
   buildNoRepeatInstructions,
 } from '../../../lib/conversation-tracker';
 import { trackEvent } from '../../../lib/analytics';
+import {
+  extractEmails,
+  isSignupIntent,
+  CONFIRM_LEAD_RESPONSE,
+  CLARIFY_INTENT_RESPONSE,
+} from '../../../lib/email-intercept';
+import { saveLead } from '../../../lib/leads-db';
 
 export const runtime = 'nodejs';
 
@@ -134,6 +141,7 @@ RULES:
 - Answer immediately. Max 1 follow-up question per response. Be concise with bullets.
 - Cite vault sources as "Based on [Title, Section]: …" — never fabricate citations. No internal state references.
 - Do NOT fabricate, speculate, or infer answers beyond what the KNOWLEDGE_VAULT provides. Every factual claim MUST be grounded in the KNOWLEDGE_VAULT context below.
+- NEVER invent or fabricate email addresses (e.g. security@, privacy@, support@, info@). If you do not know a real contact address, do not provide one.
 - If the KNOWLEDGE_VAULT does not contain information to answer the user's question, respond EXACTLY with: "My current security clearance (context) does not contain the answer to that specific protocol."
 - If pricing asked: "VaultFill offers startup-friendly pricing — plans announced soon. Drop your email for early access."
 - After 3+ exchanges, suggest saving analysis via email.
@@ -228,6 +236,61 @@ export async function POST(req: Request) {
 
     // Record the user message
     if (query) recordMessage(sessionId, 'user', query);
+
+    // ==================================================================
+    // PHASE 0: EMAIL INTERCEPT — detect email, skip LLM entirely
+    // ==================================================================
+    const detectedEmails = extractEmails(query);
+
+    if (detectedEmails.length > 0) {
+      // Find previous assistant message to determine context
+      const prevAssistant = [...messages]
+        .reverse()
+        .find((m) => m.role === 'assistant');
+      const prevAssistantText = prevAssistant?.content ?? '';
+
+      const signup = isSignupIntent(query, prevAssistantText);
+
+      if (signup) {
+        // ── SIGNUP FLOW: record lead, return deterministic confirmation ──
+        const email = detectedEmails[0];
+        try {
+          await saveLead({
+            email,
+            createdAt: new Date().toISOString(),
+            ua: req.headers.get('user-agent') ?? undefined,
+            source: 'chat-email-intercept',
+          });
+        } catch (err) {
+          console.error('[chat] Lead save failed:', err);
+        }
+
+        recordMessage(sessionId, 'assistant', CONFIRM_LEAD_RESPONSE);
+
+        // Advance state machine to S7 if applicable
+        if (canTransition(ss.state, 'S7' as OnboardingState)) {
+          ss.state = 'S7';
+          trackEvent('onboarding.lead_captured', {
+            sessionId,
+            fromState: STATE_LABELS[ss.state],
+            trigger: 'email_intercept',
+          });
+        }
+
+        return new Response(CONFIRM_LEAD_RESPONSE, {
+          status: 200,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      } else {
+        // ── UNCLEAR CONTEXT: ask one clarifying question ────────────────
+        recordMessage(sessionId, 'assistant', CLARIFY_INTENT_RESPONSE);
+
+        return new Response(CLARIFY_INTENT_RESPONSE, {
+          status: 200,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      }
+    }
 
     // ==================================================================
     // PHASE 1: FRAMEWORK & TOPIC DETECTION
