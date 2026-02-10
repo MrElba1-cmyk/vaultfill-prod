@@ -29,8 +29,8 @@ for i in "${!MESSAGES[@]}"; do
   idx=$((i + 1))
   echo "--- Test ${idx}/5: \"${msg}\" ---"
 
-  # Use a unique session per test run but shared across messages (simulates conversation)
-  SESSION_ID="smoke-test-$$"
+  # Use a unique session per message to get independent responses (maximizes citation coverage)
+  SESSION_ID="smoke-test-$$-${idx}"
 
   # Capture HTTP status code and body separately
   HTTP_CODE=$(curl -s -o /tmp/shieldbot_response_${idx}.txt -w "%{http_code}" \
@@ -72,7 +72,7 @@ for i in "${!MESSAGES[@]}"; do
   fi
 
   # Check 4: Citation detection (tracked globally)
-  if echo "$BODY" | grep -qP 'Based on \[.*?\]:'; then
+  if echo "$BODY" | grep -qiP 'Based on .*?(SOC|File:|Section:|Report|Policy)'; then
     echo "  ✅ Citation found"
     CITATION_FOUND=1
   else

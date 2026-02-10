@@ -75,11 +75,27 @@ function sanitizeMessages(
   return clean.slice(-maxMessages);
 }
 
+// ---- Token estimation & chunk truncation ----
+
+/** Rough token count (~4 chars per token for English text). */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/** Truncate a chunk to ~500 tokens, keeping the first portion and appending an ellipsis. */
+function truncateChunk(content: string, maxTokens = 500): string {
+  const est = estimateTokens(content);
+  if (est <= maxTokens) return content;
+  // Keep first ~maxTokens worth of characters
+  const maxChars = maxTokens * 4;
+  return content.slice(0, maxChars).trimEnd() + ' …[truncated]';
+}
+
 // ---- Citation formatter ----
 
 /**
  * Build citation-annotated RAG context for the system prompt.
- * Each chunk gets a citation tag like [SOC 2 Type II Report, Encryption at Rest].
+ * Each chunk gets a citation tag. Chunks over 500 tokens are truncated.
  */
 function buildCitedRAGContext(results: RAGResult[]): string {
   if (results.length === 0) return '';
@@ -91,9 +107,10 @@ function buildCitedRAGContext(results: RAGResult[]): string {
     const citationLabel = sectionTitle
       ? `${r.sourceTitle}, ${sectionTitle}`
       : r.sourceTitle;
+    const trimmedContent = truncateChunk(r.content.trim());
 
     sections.push(
-      `[CITATION: ${citationLabel} | File: ${r.source} | Relevance: ${(r.score * 100).toFixed(0)}%]\n${r.content.trim()}`,
+      `[${citationLabel}]\n${trimmedContent}`,
     );
   }
 
@@ -244,8 +261,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // Sanitize: only role+content, hard cap at 8 messages to prevent token overflow / crashes
-    const messages = sanitizeMessages(conversationMessages, 8);
+    // Sliding window memory: keep only the last 10 turns (20 messages) to bound token usage
+    const messages = sanitizeMessages(conversationMessages, 20);
 
     const sessionId = req.headers.get('x-vaultfill-session-id') || 'anonymous';
 
@@ -336,8 +353,8 @@ export async function POST(req: Request) {
 
         console.log(`[chat] RAG query: "${augmentedQuery.slice(0, 120)}..."`);
 
-        // Query with structured results
-        ragResults = await queryKnowledgeVaultStructured(augmentedQuery, 6, 0.20);
+        // Top-3 rule: fetch only 3 most relevant chunks to minimize input tokens
+        ragResults = await queryKnowledgeVaultStructured(augmentedQuery, 3, 0.25);
 
         console.log(
           `[chat] RAG returned ${ragResults.length} results. Top scores: [${ragResults.slice(0, 3).map((r) => r.score.toFixed(3)).join(', ')}]`,
