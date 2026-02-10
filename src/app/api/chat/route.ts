@@ -371,7 +371,6 @@ export async function POST(req: Request) {
       ),
       messages,
       temperature: 0.5, // Increased temperature for less stuck responses
-      maxTokens: 500,   // Hard cap to prevent runaway generation
       onFinish: ({ text }) => {
         recordMessage(sessionId, 'assistant', text);
 
