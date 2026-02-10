@@ -36,7 +36,7 @@ export default function SandboxBanner() {
                 <span className="text-[10px] text-[var(--muted-2)]">Anonymous Session</span>
               </div>
               <p className="mt-1 text-xs leading-relaxed text-[var(--muted-2)]">
-                You&apos;re in a <span className="text-emerald-700 dark:text-emerald-400/80 font-medium">private sandbox</span>. No account needed. Nothing is tracked, stored, or linked to you. Explore freely — this session is ephemeral.
+                You&apos;re in a <span className="text-emerald-700 dark:text-emerald-400/80 font-medium">private sandbox</span>. No account needed. Session data is held in memory only and not persisted. Explore freely.
               </p>
             </div>
 

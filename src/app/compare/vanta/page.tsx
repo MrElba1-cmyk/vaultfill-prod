@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "VaultFill vs. Vanta — An Honest Comparison | VaultFill",
   description:
-    "Compare VaultFill's document-native, zero-knowledge questionnaire automation with Vanta's integration-heavy compliance platform. See which fits your team.",
+    "Compare VaultFill's document-native, privacy-first questionnaire automation with Vanta's integration-heavy compliance platform. See which fits your team.",
   openGraph: {
     title: "VaultFill vs. Vanta — An Honest Comparison",
     description:
@@ -26,7 +26,7 @@ const comparisonRows = [
   },
   {
     area: "Privacy",
-    vaultfill: "Zero-knowledge architecture. Your docs stay yours.",
+    vaultfill: "Privacy-first architecture. Your docs stay yours.",
     vanta: "Requires deep access to cloud infrastructure, repos, and HR systems.",
   },
   {
@@ -66,7 +66,7 @@ const switchingReasons = [
     problem:
       "To do its job, Vanta needs read access across your infrastructure: cloud accounts, code repositories, endpoint management, HR platforms. For companies handling sensitive data or operating under strict privacy requirements, that level of access can be a dealbreaker.",
     solution:
-      "VaultFill operates on a zero-knowledge model. We process your uploaded documents — nothing more. We don't connect to your infrastructure, read your codebase, or access employee data. Your security posture stays between you and your documents.",
+      "VaultFill operates on a privacy-first model. We process your uploaded documents — nothing more. We don't connect to your infrastructure, read your codebase, or access employee data. Your security posture stays between you and your documents.",
   },
   {
     num: "03",

@@ -26,13 +26,13 @@ export default function PrivacyPromise() {
         </div>
 
         <p className="max-w-3xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-          VaultFill is built on a <span className="font-semibold text-emerald-700 dark:text-emerald-400">zero-knowledge architecture</span>.
-          Your data stays yours — always.
+          VaultFill is built with a <span className="font-semibold text-emerald-700 dark:text-emerald-400">privacy-first architecture</span>.
+          Your data stays yours — we minimize what we store, never train on it, and give you full control.
         </p>
 
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {[
-            { title: 'Ephemeral Sessions', desc: 'No data is stored server-side after your session ends. Every interaction is transient.' },
+            { title: 'Minimal Retention', desc: 'Session context is held in memory only for the duration of your conversation and automatically purged. We don\u0027t persist chat history to disk.' },
             { title: 'No Model Training', desc: 'We never train on your documents, queries, or responses. Your evidence is never used to improve our models.' },
             { title: 'Tenant Isolation', desc: 'Processing is fully isolated per tenant. No cross-contamination, no shared context, no data leakage.' },
           ].map((item) => (

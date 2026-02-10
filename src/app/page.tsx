@@ -37,7 +37,7 @@ const features = [
   },
   {
     title: "Security-First Architecture",
-    desc: "Tenant isolation, encrypted evidence storage, and audit trails designed for enterprise compliance requirements.",
+    desc: "Tenant isolation, secure evidence handling, and audit trails designed for enterprise compliance requirements.",
     icon: "🔒",
   },
 ];
@@ -71,7 +71,7 @@ const faqs = [
   },
   {
     q: "Is our data safe?",
-    a: "Evidence is encrypted at rest and in transit. Tenant isolation is enforced with row-level security. We never train on your data.",
+    a: "Data is encrypted in transit via TLS. Tenant isolation is enforced at the application layer. We use OpenAI's enterprise API which does not train on your data.",
   },
   {
     q: "How fast can we see results?",

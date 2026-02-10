@@ -10,8 +10,8 @@ const badges = [
         <path d="M9 12l2 2 4-4" />
       </svg>
     ),
-    title: 'No Data Stored',
-    desc: 'Zero-retention architecture. Your queries are never logged or saved.',
+    title: 'Minimal Data Retention',
+    desc: 'Chat context lives in memory only during your session. Lead info you voluntarily submit is stored securely.',
   },
   {
     icon: (
@@ -20,8 +20,8 @@ const badges = [
         <path d="M7 11V7a5 5 0 0110 0v4" />
       </svg>
     ),
-    title: 'End-to-End Encrypted',
-    desc: 'All data in transit and at rest is encrypted with AES-256.',
+    title: 'Encrypted in Transit',
+    desc: 'All connections use TLS. AI processing uses OpenAI\u0027s enterprise API with no model training on your data.',
   },
   {
     icon: (
@@ -30,8 +30,8 @@ const badges = [
         <path d="M9 12l2 2 4-4" />
       </svg>
     ),
-    title: 'SOC 2 Ready',
-    desc: 'Built to SOC 2 Type II standards from day one.',
+    title: 'SOC 2 Designed',
+    desc: 'Architecture follows SOC 2 Type II control principles. Formal audit planned.',
   },
   {
     icon: (
@@ -41,8 +41,8 @@ const badges = [
         <line x1="1" y1="1" x2="23" y2="23" />
       </svg>
     ),
-    title: 'Anonymous by Default',
-    desc: 'No accounts required. No tracking. No cookies.',
+    title: 'No Account Required',
+    desc: 'Try VaultFill without signing up. A local session ID is used for conversation continuity only.',
   },
 ];
 

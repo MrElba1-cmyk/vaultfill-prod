@@ -362,7 +362,7 @@ export default function FloatingChat() {
               <ChatBotAvatar size={36} />
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
-                <p className="text-xs text-[var(--muted-2)] truncate">Private · Anonymous · No tracking</p>
+                <p className="text-xs text-[var(--muted-2)] truncate">Private · No account required</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
