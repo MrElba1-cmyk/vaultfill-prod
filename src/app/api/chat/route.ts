@@ -397,6 +397,33 @@ export async function POST(req: Request) {
           console.error('[L1:receptionist] Failed to update lead with company name:', err);
         }
         setWaitingForCompany(sessionId, false);
+
+        const resp = `Perfect — I’ve registered **${companyName}** for the pilot. A member of the VaultFill deployment team will reach out shortly.`;
+        recordMessage(sessionId, 'assistant', resp);
+        return new Response(resp, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
+          },
+        });
+      }
+
+      // If we’re waiting for company but somehow don’t have an email, restart the flow.
+      if (!capturedEmail) {
+        const resp = `To get you set up, please enter your **email address** first.`;
+        recordMessage(sessionId, 'assistant', resp);
+        setWaitingForEmail(sessionId, true);
+        setWaitingForCompany(sessionId, false);
+        return new Response(resp, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
+          },
+        });
       }
     }
 
