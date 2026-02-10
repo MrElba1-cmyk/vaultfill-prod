@@ -108,7 +108,8 @@ export type IntentSubtype =
   | 'farewell'
   | 'thanks'
   | 'affirmative'
-  | 'meta_product'       // "what is VaultFill", "how does it work"
+  | 'meta_product'        // "what is VaultFill", "how does it work"
+  | 'standard_reference'  // official standards/control references (SOC 2 CC6.1, NIST AC-2, ISO 27001 A.5.1, etc.)
   | 'security_technical'; // anything that should hit RAG
 
 export interface IntentResult {
@@ -194,6 +195,23 @@ export function classifyIntent(query: string): IntentResult {
         confidence: rule.confidence,
       };
     }
+  }
+
+    // Standard/control reference detection (official external knowledge path)
+  // Examples:
+  // - "What is SOC 2 CC6.1?"
+  // - "Explain NIST 800-53 AC-2"
+  // - "ISO 27001 A.5.1"
+  const isStandardRef =
+    /\bSOC\s*2\b/i.test(trimmed) && /\bCC\s*\d+(?:\.\d+)?\b/i.test(trimmed) ||
+    /\bNIST\b/i.test(trimmed) && /(800-53|800-171|CSF)\b/i.test(trimmed) ||
+    /\bISO\b/i.test(trimmed) && /(27001|27002)\b/i.test(trimmed) ||
+    /\bAnnex\s*A\b/i.test(trimmed) ||
+    /\bA\.\d+(?:\.\d+)*\b/i.test(trimmed) ||
+    /\b(AC|AU|IA|SC|CM|IR|CP|PE|PS|RA|CA)-\d+\b/i.test(trimmed);
+
+  if (isStandardRef) {
+    return { intentClass: 'B', subtype: 'standard_reference', confidence: 0.85 };
   }
 
   // Default: Class B (security/technical → RAG)

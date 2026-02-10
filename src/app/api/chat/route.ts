@@ -16,6 +16,10 @@ import {
 } from '../../../lib/sessions';
 import { saveLead } from '../../../lib/leads-db';
 import {
+  hasOfficialStandardsSearchConfigured,
+  searchOfficialStandards,
+} from '../../../lib/official-standards-search';
+import {
   type OnboardingState,
   detectStateFromResponse,
   detectStateFromUserInput,
@@ -526,6 +530,55 @@ export async function POST(req: Request) {
     let usedSoftFallback = false;
 
     if (intent.intentClass === 'B') {
+      // ================================================================
+      // OFFICIAL STANDARDS SEARCH (Phase 1 External Knowledge)
+      // ================================================================
+      // For control/standard references (SOC 2 CC6.1, NIST controls, ISO clauses),
+      // use official-domain search first to prevent hallucinated control text.
+      if (intent.subtype === 'standard_reference') {
+        if (!hasOfficialStandardsSearchConfigured()) {
+          const msg =
+            `I can look this up in official standards sources, but that feature isn't enabled yet.\n\n` +
+            `To enable it, configure a Google Programmable Search Engine restricted to:\n` +
+            `- https://csrc.nist.gov\n- https://www.aicpa.org\n- https://www.iso.org\n\n` +
+            `Then set server env vars: OFFICIAL_STANDARDS_SEARCH_API_KEY and OFFICIAL_STANDARDS_SEARCH_CX.`;
+          recordMessage(sessionId, 'assistant', msg);
+          return new Response(msg, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'X-VaultFill-Source': 'vault',
+            },
+          });
+        }
+
+        try {
+          const results = await searchOfficialStandards(query, 5);
+          if (results.length > 0) {
+            const lines: string[] = [];
+            lines.push(`Here are official references I found for your question:`);
+            for (const r of results.slice(0, 3)) {
+              const snippet = r.snippet ? ` — ${r.snippet}` : '';
+              lines.push(`- ${r.title}: ${r.link}${snippet}`);
+            }
+            lines.push(`\nIf you want, tell me which link you’re using and what you need (definition vs. implementation guidance), and I’ll summarize at a high level without guessing any proprietary control text.`);
+
+            const out = lines.join('\n');
+            recordMessage(sessionId, 'assistant', out);
+            return new Response(out, {
+              status: 200,
+              headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'X-VaultFill-Source': 'vault',
+              },
+            });
+          }
+        } catch (err) {
+          console.error('[official-standards] search failed:', err);
+        }
+        // If official search returns nothing, fall back to vault RAG below.
+      }
+
       try {
         if (query) {
           const augmentedQuery = buildAugmentedQuery(query, detectedContexts);
@@ -564,7 +617,10 @@ export async function POST(req: Request) {
 
         return new Response(softFallbackText, {
           status: 200,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'vault',
+          },
         });
       }
     } // end Class B RAG
