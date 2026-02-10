@@ -52,6 +52,9 @@ export default function SocialProof() {
 
       {/* Company ticker */}
       <div className="relative overflow-hidden py-6 mb-14">
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--bg)] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--bg)] to-transparent" />
         <div className="flex animate-[scroll_30s_linear_infinite] gap-12 whitespace-nowrap">
           {[...companies, ...companies].map((c, i) => (
             <span key={`${c}-${i}`} className="text-sm font-semibold tracking-wide text-[var(--muted)] opacity-60">
@@ -69,11 +72,11 @@ export default function SocialProof() {
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-sm"
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-200 hover:border-[color-mix(in_srgb,var(--vault-blue)_25%,var(--border))]"
           >
             <p className="text-sm leading-relaxed text-[var(--muted)] italic">&ldquo;{t.quote}&rdquo;</p>
-            <div className="mt-4 border-t border-white/[0.06] pt-4">
+            <div className="mt-4 border-t border-[var(--border)] pt-4">
               <div className="text-sm font-semibold text-[var(--fg)]">{t.name}</div>
               <div className="text-xs text-[var(--muted-2)]">{t.role}</div>
             </div>

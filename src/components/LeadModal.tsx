@@ -167,7 +167,7 @@ export default function LeadModal({
 
           {/* Panel */}
           <motion.div
-            className="relative w-full max-w-[480px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0f]/95 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_24px_68px_rgba(0,0,0,0.55),0_8px_20px_rgba(0,0,0,0.35)] sm:rounded-3xl"
+            className="relative w-full max-w-[480px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-natural)] backdrop-blur-xl sm:rounded-3xl"
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}

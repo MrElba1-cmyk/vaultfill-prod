@@ -16,7 +16,7 @@ export default function PrivacyPromise() {
 
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 dark:text-emerald-400">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
@@ -26,7 +26,7 @@ export default function PrivacyPromise() {
         </div>
 
         <p className="max-w-3xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-          VaultFill is built on a <span className="font-semibold text-emerald-400">zero-knowledge architecture</span>.
+          VaultFill is built on a <span className="font-semibold text-emerald-700 dark:text-emerald-400">zero-knowledge architecture</span>.
           Your data stays yours — always.
         </p>
 
@@ -36,9 +36,9 @@ export default function PrivacyPromise() {
             { title: 'No Model Training', desc: 'We never train on your documents, queries, or responses. Your evidence is never used to improve our models.' },
             { title: 'Tenant Isolation', desc: 'Processing is fully isolated per tenant. No cross-contamination, no shared context, no data leakage.' },
           ].map((item) => (
-            <li key={item.title} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <li key={item.title} className="rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-4">
               <h3 className="text-sm font-semibold text-[var(--fg)]">{item.title}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-white/50">{item.desc}</p>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--muted-2)]">{item.desc}</p>
             </li>
           ))}
         </ul>

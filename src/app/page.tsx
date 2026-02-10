@@ -235,7 +235,7 @@ export default function Home() {
 
                   <a
                     href="#how-it-works"
-                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-white/5 px-7 py-3.5 text-sm font-semibold text-[var(--fg)] transition-all hover:bg-white/10"
+                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-2)] px-7 py-3.5 text-sm font-semibold text-[var(--fg)] transition-all hover:bg-[var(--card)]"
                   >
                     See the workflow
                   </a>
@@ -284,14 +284,14 @@ export default function Home() {
                         cite: "IR-Plan.pdf § Appendix A",
                       },
                     ].map((item) => (
-                      <div key={item.q} className="rounded-xl border border-[var(--border)] bg-black/15 p-3 sm:rounded-2xl sm:p-4">
+                      <div key={item.q} className="rounded-xl border border-[var(--border)] bg-[var(--bg)]/40 p-3 sm:rounded-2xl sm:p-4">
                         <div className="text-[11px] font-semibold text-[var(--muted-2)]">{item.q}</div>
                         <div className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{item.a}</div>
                         <div className="mt-2.5 flex items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
                             {item.cite}
                           </span>
-                          <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+                          <span className="rounded-md border border-[var(--border)] bg-[var(--card-2)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
                             ✓ Reviewed
                           </span>
                         </div>
@@ -380,7 +380,7 @@ export default function Home() {
 
                 <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {["Policies", "SOC 2", "ISO Artifacts", "Pen Tests", "Customer Docs", "Standard Answers"].map((t) => (
-                    <div key={t} className="rounded-xl border border-[var(--border)] bg-white/5 px-3 py-2 text-[11px] font-semibold text-[var(--muted)]">
+                    <div key={t} className="rounded-xl border border-[var(--border)] bg-[var(--card-2)] px-3 py-2 text-[11px] font-semibold text-[var(--muted)]">
                       {t}
                     </div>
                   ))}
@@ -488,7 +488,7 @@ export default function Home() {
               <div>
                 <div className="text-sm font-semibold text-[var(--fg)]">VaultFill</div>
                 <div className="text-[11px] text-[var(--muted-2)]">Evidence-backed answers for security questionnaires.</div>
-                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-3 py-1 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
+                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card-2)] px-3 py-1 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
                   <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                   Houston-born
                 </div>

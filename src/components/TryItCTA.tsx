@@ -31,10 +31,9 @@ export default function TryItCTA() {
             <button
               key={p}
               onClick={() => {
-                // Dispatch a custom event that FloatingChat can listen for
                 window.dispatchEvent(new CustomEvent('vaultfill:prompt', { detail: p }));
               }}
-              className="rounded-full border border-white/[0.1] bg-white/[0.05] px-4 py-2 text-xs font-medium text-[var(--muted)] transition-all hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-[var(--fg)]"
+              className="rounded-full border border-[var(--border)] bg-[var(--card-2)] px-4 py-2 text-xs font-medium text-[var(--muted)] transition-all hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-[var(--fg)]"
             >
               {p}
             </button>

@@ -181,7 +181,7 @@ export default function LivePreview({
                           "w-full text-left flex items-center justify-between rounded-lg border px-4 py-3 text-xs font-semibold transition-colors " +
                           (isActive
                             ? "border-cyan-500/25 bg-cyan-500/10"
-                            : "border-[var(--border)] bg-white/5 hover:bg-white/8")
+                            : "border-[var(--border)] bg-[var(--card-2)] hover:bg-[var(--card)]")
                         }
                         style={isActive ? { color: "var(--vault-blue)" } : { color: "var(--muted)" }}
                       >
@@ -206,7 +206,7 @@ export default function LivePreview({
                   {FIELDS.map((f) => (
                     <div
                       key={f.id}
-                      className="rounded-lg border border-[var(--border)] bg-white/5 px-4 py-3"
+                      className="rounded-lg border border-[var(--border)] bg-[var(--card-2)] px-4 py-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-xs font-semibold text-[var(--muted)]">{f.label}</div>
@@ -214,8 +214,8 @@ export default function LivePreview({
                           className={
                             "rounded-lg px-2 py-1 text-[10px] font-semibold ring-1 transition-colors " +
                             (filled
-                              ? "bg-emerald-500/10 text-emerald-200 ring-emerald-500/20"
-                              : "bg-white/5 text-[var(--muted-2)] ring-white/10")
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/20"
+                              : "bg-[var(--card-2)] text-[var(--muted-2)] ring-[var(--border)]")
                           }
                         >
                           {filled ? "filled" : "pending"}

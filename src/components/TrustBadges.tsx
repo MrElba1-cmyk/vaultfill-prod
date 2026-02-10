@@ -53,15 +53,16 @@ export default function TrustBadges() {
         <motion.div
           key={badge.title}
           initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 * i }}
-          className="group relative rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm transition-colors hover:border-white/[0.15] hover:bg-white/[0.06]"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.1 * i, ease: [0.22, 1, 0.36, 1] }}
+          className="group relative rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-4 backdrop-blur-sm transition-all duration-200 hover:border-emerald-500/25 hover:shadow-[0_0_30px_var(--glow-emerald)]"
         >
-          <div className="mb-3 inline-flex rounded-lg bg-emerald-500/10 p-2 text-emerald-400">
+          <div className="mb-3 inline-flex rounded-lg bg-emerald-500/10 p-2 text-emerald-500 dark:text-emerald-400">
             {badge.icon}
           </div>
-          <h3 className="text-sm font-semibold text-white">{badge.title}</h3>
-          <p className="mt-1 text-xs leading-relaxed text-white/50">{badge.desc}</p>
+          <h3 className="text-sm font-semibold text-[var(--fg)]">{badge.title}</h3>
+          <p className="mt-1 text-xs leading-relaxed text-[var(--muted-2)]">{badge.desc}</p>
         </motion.div>
       ))}
     </div>
