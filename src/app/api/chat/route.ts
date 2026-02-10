@@ -13,30 +13,7 @@ import { trackEvent } from '../../../lib/analytics';
 
 export const runtime = 'nodejs';
 
-// Rate limiting: 20 requests per minute per IP
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 20;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  entry.count++;
-  return entry.count <= RATE_LIMIT_MAX;
-}
-
-// Periodic cleanup of stale entries (every 5 min)
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of rateLimitMap) {
-    if (now > entry.resetTime) rateLimitMap.delete(ip);
-  }
-}, 300_000);
-
+// Rate limiting is handled in middleware (proxy.ts) at the edge layer.
 // In-memory state store (per session). In production, persist to DB.
 const sessionStates = new Map<string, { state: OnboardingState; messageCount: number }>();
 
@@ -80,17 +57,6 @@ Response style:
 }
 
 export async function POST(req: Request) {
-  // Rate limiting
-  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
-    || req.headers.get('x-real-ip') 
-    || 'unknown';
-  if (!checkRateLimit(clientIp)) {
-    return new Response(JSON.stringify({ error: 'Rate limit exceeded. Max 20 requests per minute.' }), {
-      status: 429,
-      headers: { 'Content-Type': 'application/json', 'Retry-After': '60' },
-    });
-  }
-
   try {
     const body = await req.json();
     // Accept both client formats:
