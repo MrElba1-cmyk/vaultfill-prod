@@ -140,7 +140,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Sanitize and enforce max lengths
+    // Reject if name or company exceed max length
+    if (rawName.length > 100) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_input", detail: "name must be 100 characters or fewer" },
+        { status: 400 }
+      );
+    }
+    if (rawCompany.length > 200) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_input", detail: "company must be 200 characters or fewer" },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize fields
     const sanitizedName = stripHtmlTags(rawName).substring(0, 100);
     const sanitizedCompany = stripHtmlTags(rawCompany).substring(0, 200);
 
