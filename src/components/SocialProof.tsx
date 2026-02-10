@@ -41,26 +41,38 @@ export default function SocialProof() {
       transition={{ duration: 0.5 }}
     >
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-6 text-center mb-14">
+      <div className="grid grid-cols-1 gap-4 text-center mb-14 sm:grid-cols-3">
         {stats.map((s) => (
-          <div key={s.label}>
-            <div className="text-3xl font-bold tracking-tight text-[var(--fg)] sm:text-4xl">{s.value}</div>
-            <div className="mt-1 text-xs text-[var(--muted-2)] sm:text-sm">{s.label}</div>
-          </div>
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="group relative rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-200 hover:border-emerald-500/25 hover:shadow-[0_0_30px_var(--glow-emerald)]"
+          >
+            <div className="text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-br from-emerald-400 to-emerald-600 bg-clip-text text-transparent">{s.value}</div>
+            <div className="mt-2 text-xs text-[var(--muted-2)] sm:text-sm">{s.label}</div>
+          </motion.div>
         ))}
       </div>
 
       {/* Company ticker */}
-      <div className="relative overflow-hidden py-6 mb-14">
-        {/* Fade edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--bg)] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--bg)] to-transparent" />
-        <div className="flex animate-[scroll_30s_linear_infinite] gap-12 whitespace-nowrap">
-          {[...companies, ...companies].map((c, i) => (
-            <span key={`${c}-${i}`} className="text-sm font-semibold tracking-wide text-[var(--muted)] opacity-60">
-              {c}
-            </span>
-          ))}
+      <div className="mb-14">
+        <p className="mb-4 text-center text-xs font-medium uppercase tracking-widest text-[var(--muted-2)]">
+          Trusted by security teams worldwide
+        </p>
+        <div className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card-2)] py-5 backdrop-blur-sm">
+          {/* Fade edges */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--card-2)] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--card-2)] to-transparent" />
+          <div className="flex animate-[scroll_30s_linear_infinite] gap-12 whitespace-nowrap">
+            {[...companies, ...companies].map((c, i) => (
+              <span key={`${c}-${i}`} className="text-sm font-semibold tracking-wide text-[var(--muted)] opacity-60">
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
