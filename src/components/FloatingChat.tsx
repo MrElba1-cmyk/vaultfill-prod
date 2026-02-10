@@ -103,6 +103,7 @@ export default function FloatingChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  const [showRebrandBanner, setShowRebrandBanner] = useState(false);
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [onboardingState, setOnboardingState] = useState<OnboardingState>('S1');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -115,6 +116,9 @@ export default function FloatingChat() {
       try {
         const parsed = JSON.parse(saved);
         setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+        if (!localStorage.getItem('athena-rebrand-dismissed')) {
+          setShowRebrandBanner(true);
+        }
       } catch { setMessages([WELCOME_MESSAGE]); }
     }
   }, []);
@@ -286,7 +290,7 @@ export default function FloatingChat() {
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        aria-label={isOpen ? 'Close chat' : 'Open VaultFill AI Assistant'}
+        aria-label={isOpen ? 'Close chat' : 'Open Athena AI Assistant'}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -352,8 +356,8 @@ export default function FloatingChat() {
             >
               <ChatBotAvatar size={36} />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
-                <p className="text-xs text-[var(--muted-2)] truncate">Private · No account required</p>
+                <h3 className="text-sm font-semibold text-[var(--fg)] truncate">Athena</h3>
+                <p className="text-xs text-[var(--muted-2)] truncate">Athena - AI Security Architect</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -369,6 +373,35 @@ export default function FloatingChat() {
                 </svg>
               </button>
             </div>
+
+            {/* Rebrand Banner */}
+            <AnimatePresence>
+              {showRebrandBanner && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="flex items-center justify-between gap-2 border-b px-4 py-2"
+                  style={{ borderColor: 'var(--border)', background: 'rgba(59, 130, 246, 0.08)' }}
+                >
+                  <p className="text-xs text-[var(--muted-2)]">
+                    ✨ Metis has been upgraded to Athena. More precise, more secure.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowRebrandBanner(false);
+                      localStorage.setItem('athena-rebrand-dismissed', '1');
+                    }}
+                    className="shrink-0 text-[var(--muted-2)] hover:text-[var(--fg)] transition-colors"
+                    aria-label="Dismiss banner"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* ── Messages ── */}
             <div className="flex-1 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: 'thin' }}>

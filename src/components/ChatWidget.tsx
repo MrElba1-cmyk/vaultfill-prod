@@ -73,6 +73,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  const [showRebrandBanner, setShowRebrandBanner] = useState(false);
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +89,10 @@ export default function ChatWidget() {
           timestamp: new Date(msg.timestamp)
         }));
         setMessages(messagesWithDates);
+        // Show rebrand banner for returning users who haven't dismissed it
+        if (!localStorage.getItem('athena-rebrand-dismissed')) {
+          setShowRebrandBanner(true);
+        }
       } catch (e) {
         console.error('Error loading chat history:', e);
         setMessages([WELCOME_MESSAGE]);
@@ -313,7 +318,7 @@ export default function ChatWidget() {
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        aria-label={isOpen ? 'Close chat' : 'Open VaultFill AI Assistant'}
+        aria-label={isOpen ? 'Close chat' : 'Open Athena AI Assistant'}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -380,8 +385,8 @@ export default function ChatWidget() {
             >
               <ShieldIcon className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-[var(--fg)] truncate">VaultFill AI Assistant</h3>
-                <p className="text-xs text-[var(--muted-2)] truncate">Technical Support</p>
+                <h3 className="text-sm font-semibold text-[var(--fg)] truncate">Athena</h3>
+                <p className="text-xs text-[var(--muted-2)] truncate">Athena - AI Security Architect</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="h-2 w-2 rounded-full bg-green-400" />
@@ -397,6 +402,35 @@ export default function ChatWidget() {
                 </svg>
               </button>
             </div>
+
+            {/* Rebrand Banner */}
+            <AnimatePresence>
+              {showRebrandBanner && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="flex items-center justify-between gap-2 border-b px-4 py-2"
+                  style={{ borderColor: 'var(--border)', background: 'rgba(59, 130, 246, 0.08)' }}
+                >
+                  <p className="text-xs text-[var(--muted-2)]">
+                    ✨ Metis has been upgraded to Athena. More precise, more secure.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowRebrandBanner(false);
+                      localStorage.setItem('athena-rebrand-dismissed', '1');
+                    }}
+                    className="shrink-0 text-[var(--muted-2)] hover:text-[var(--fg)] transition-colors"
+                    aria-label="Dismiss banner"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4" style={{ scrollbarWidth: 'thin' }}>
@@ -519,7 +553,7 @@ export default function ChatWidget() {
                 </div>
               </form>
               <p className="mt-2 text-center text-[10px] text-[var(--muted-2)]">
-                Session ID: {sessionId.slice(-8)} • Powered by VaultFill Knowledge Vault
+                Session ID: {sessionId.slice(-8)} • Powered by Athena Knowledge Vault
               </p>
             </div>
           </motion.div>
