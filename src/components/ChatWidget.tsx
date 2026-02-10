@@ -133,12 +133,13 @@ export default function ChatWidget() {
       setIsLoading(true);
 
       try {
-        // Build clean messages array: history (last 9) + current user message = max 10
+        // Build clean messages array: history (last 7) + current user message = max 8
+        // Hard cap to prevent token overflow / crashes on long conversations.
         // We send `message` separately AND in the array so the server always has
         // the current user input even if React state hasn't flushed yet.
         const historyForApi = messages
-          .filter((m) => m.id !== 'welcome') // skip the static welcome message
-          .slice(-9) // last 9 from history
+          .filter((m) => m.id !== 'welcome' && m.content && m.content.trim() !== '') // skip welcome + empty messages
+          .slice(-7) // last 7 from history
           .map((m) => ({ role: m.role, content: m.content }));
 
         const res = await fetch('/api/chat', {
@@ -160,14 +161,15 @@ export default function ChatWidget() {
         // Check if the response is a stream (from AI SDK) or JSON (fallback)
         const contentType = res.headers.get('content-type');
         
-        if (contentType?.includes('text/plain')) {
-          // Handle streaming response
+        if (contentType?.includes('text/plain') || contentType?.includes('text/event-stream')) {
+          // Handle plain text stream from AI SDK v6 toTextStreamResponse()
+          // The stream sends raw text chunks — no protocol framing.
           const reader = res.body?.getReader();
           const decoder = new TextDecoder();
           let responseContent = '';
 
           if (reader) {
-            // Add empty assistant message that we'll update
+            // Add empty assistant message that we'll update as chunks arrive
             const assistantMsg: ChatMessage = {
               id: `assistant-${Date.now()}`,
               role: 'assistant',
@@ -180,31 +182,36 @@ export default function ChatWidget() {
               const { done, value } = await reader.read();
               if (done) break;
 
-              const chunk = decoder.decode(value);
-              const lines = chunk.split('\n');
-
-              for (const line of lines) {
-                if (line.startsWith('0:')) {
-                  try {
-                    const jsonStr = line.substring(2);
-                    const data = JSON.parse(jsonStr);
-                    if (data && typeof data === 'string') {
-                      responseContent += data;
-                      // Update the assistant message with accumulated content
-                      setMessages((prev) => {
-                        const updated = [...prev];
-                        const lastMsg = updated[updated.length - 1];
-                        if (lastMsg && lastMsg.role === 'assistant') {
-                          lastMsg.content = responseContent;
-                        }
-                        return updated;
-                      });
-                    }
-                  } catch (e) {
-                    // Ignore parse errors for streaming
+              // Decode raw text chunk and append directly
+              const chunk = decoder.decode(value, { stream: true });
+              if (chunk) {
+                responseContent += chunk;
+                // Update the assistant message with accumulated content
+                const currentContent = responseContent;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const lastMsg = updated[updated.length - 1];
+                  if (lastMsg && lastMsg.role === 'assistant') {
+                    lastMsg.content = currentContent;
                   }
-                }
+                  return updated;
+                });
               }
+            }
+
+            // Final flush of any remaining decoder buffer
+            const finalChunk = decoder.decode();
+            if (finalChunk) {
+              responseContent += finalChunk;
+              const finalContent = responseContent;
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastMsg = updated[updated.length - 1];
+                if (lastMsg && lastMsg.role === 'assistant') {
+                  lastMsg.content = finalContent;
+                }
+                return updated;
+              });
             }
           }
         } else {

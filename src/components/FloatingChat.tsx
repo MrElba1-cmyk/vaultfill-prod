@@ -160,10 +160,19 @@ export default function FloatingChat() {
     setIsLoading(true);
 
     try {
+      // Filter out welcome message + strip STATE tags from history to avoid confusing GPT
+      const cleanHistory = messages
+        .filter(m => m.id !== 'welcome' && m.content && m.content.trim() !== '')
+        .slice(-7) // last 7 + current message = 8 max
+        .map(m => ({
+          role: m.role,
+          content: m.content.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim(),
+        }));
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-vaultfill-session-id': sessionId },
-        body: JSON.stringify({ message: trimmed, messages: messages.slice(-8) }),
+        body: JSON.stringify({ message: trimmed, messages: cleanHistory }),
       });
       if (!res.ok) throw new Error('Failed');
 
@@ -180,19 +189,20 @@ export default function FloatingChat() {
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
           responseContent += chunk;
+          // Strip STATE tags before showing to user / storing in history
+          const displayContent = responseContent.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim();
           setMessages(prev => {
             const updated = [...prev];
             const last = updated[updated.length - 1];
-            if (last?.role === 'assistant') last.content = responseContent;
+            if (last?.role === 'assistant') last.content = displayContent;
             return updated;
           });
         }
       }
 
-      // Client-side state detection from the latest assistant message
-      const latestAssistant = [...messages].reverse().find(m => m.role === 'assistant');
-      if (latestAssistant) {
-        const detected = detectStateFromResponse(latestAssistant.content);
+      // Client-side state detection from the just-streamed response
+      if (responseContent) {
+        const detected = detectStateFromResponse(responseContent);
         if (detected && canTransition(onboardingState, detected)) {
           setOnboardingState(detected);
         }
@@ -245,9 +255,9 @@ export default function FloatingChat() {
     localStorage.removeItem('vaultfill-chat-messages');
   }, []);
 
-  /* Markdown-lite */
+  /* Markdown-lite — also strips any <!-- STATE:XX --> tags from display */
   const renderContent = (content: string) =>
-    content.split('\n').map((line, i) => (
+    content.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim().split('\n').map((line, i) => (
       <p key={i} className={line === '' ? 'h-2' : ''}>
         {line.split(/(\*\*.*?\*\*|\*.*?\*)/).map((part, j) => {
           if (part.startsWith('**') && part.endsWith('**'))
