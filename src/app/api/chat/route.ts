@@ -428,6 +428,18 @@ export async function POST(req: Request) {
       `[brain:L2] Session ${sessionId} | Intent: Class ${intent.intentClass} / ${intent.subtype} (${intent.confidence.toFixed(2)})`,
     );
 
+    // Privacy-safe debug log (no raw message, no email)
+    console.log(
+      JSON.stringify({
+        kind: 'chat_intent',
+        sessionId,
+        intentClass: intent.intentClass,
+        subtype: intent.subtype,
+        state: ss.state,
+        ts: new Date().toISOString(),
+      }),
+    );
+
     // --- PHASE: Framework & topic detection ---
     const detectedContexts = detectFrameworksAndTopics(query);
     const detectedLabels = detectedContexts.map((c) => c.label);
@@ -584,13 +596,33 @@ export async function POST(req: Request) {
           const augmentedQuery = buildAugmentedQuery(query, detectedContexts);
           console.log(`[chat] RAG query: "${augmentedQuery.slice(0, 120)}..."`);
 
-          ragResults = await queryKnowledgeVaultStructured(augmentedQuery, 3, 0.25);
+          // Tiered retrieval:
+          // Step 1: User data (sample-vault/) — require high confidence
+          const userResults = await queryKnowledgeVaultStructured(augmentedQuery, 3, 0.25, 'sample-vault/');
+          const userTop = userResults.length > 0 ? Math.max(...userResults.map((r) => r.score)) : 0;
+
+          if (userTop >= 0.8) {
+            ragResults = userResults;
+          } else {
+            // Step 2: System data (docs/) — used when user has not uploaded specific policies
+            const systemResults = await queryKnowledgeVaultStructured(augmentedQuery, 3, 0.25, 'docs/');
+            ragResults = systemResults.length > 0 ? systemResults : userResults;
+          }
 
           console.log(
             `[chat] RAG returned ${ragResults.length} results. Top scores: [${ragResults.slice(0, 3).map((r) => r.score.toFixed(3)).join(', ')}]`,
           );
 
           ragContext = buildCitedRAGContext(ragResults);
+
+          // If we’re answering from system docs (Tier B/C), prepend a safe disclaimer.
+          const fromSystem = ragResults.some((r) => (r.source || '').startsWith('docs/'));
+          if (fromSystem) {
+            ragContext =
+              `NOTE_FOR_ASSISTANT: User has not uploaded a specific policy. Provide general guidance and be explicit it is general.\n` +
+              `Use phrasing like: "Note: You haven't uploaded your specific policy yet, but generally speaking…"\n\n` +
+              ragContext;
+          }
         }
       } catch (ragErr) {
         console.error('[chat] RAG query failed, continuing without context:', ragErr);
@@ -601,6 +633,19 @@ export async function POST(req: Request) {
       // ==================================================================
       const CONFIDENCE_THRESHOLD = 0.5;
       const topScore = ragResults.length > 0 ? Math.max(...ragResults.map((r) => r.score)) : 0;
+
+      // Privacy-safe retrieval log
+      console.log(
+        JSON.stringify({
+          kind: 'rag_retrieval',
+          sessionId,
+          subtype: intent.subtype,
+          resultCount: ragResults.length,
+          topScore: Number(topScore.toFixed(3)),
+          usedSystemDocs: ragResults.some((r) => (r.source || '').startsWith('docs/')),
+          ts: new Date().toISOString(),
+        }),
+      );
 
       if (topScore < CONFIDENCE_THRESHOLD) {
         console.log(

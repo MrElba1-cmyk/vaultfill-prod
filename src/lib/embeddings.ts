@@ -105,31 +105,44 @@ function cosine(a: number[], b: number[]): number {
 // ---------- load & index knowledge vault ----------
 
 async function loadAndIndex(): Promise<void> {
-  const candidates = [
-    path.join(process.cwd(), 'data', 'sample-vault'),
-    path.join(process.cwd(), 'vaultfill', 'data', 'sample-vault'),
+  // Knowledge sources
+  // Tier A (User data): data/sample-vault
+  // Tier B/C (System data): docs/ (ALLOWLIST ONLY to avoid indexing internal docs)
+  const candidates: Array<{ tier: 'user' | 'system'; dir: string }> = [
+    { tier: 'user', dir: path.join(process.cwd(), 'data', 'sample-vault') },
+    { tier: 'user', dir: path.join(process.cwd(), 'vaultfill', 'data', 'sample-vault') },
+    { tier: 'system', dir: path.join(process.cwd(), 'docs') },
   ];
 
-  let vaultDir: string | null = null;
+  const allChunks: { id: string; source: string; content: string }[] = [];
+
   for (const c of candidates) {
     try {
-      if ((await fs.stat(c)).isDirectory()) { vaultDir = c; break; }
-    } catch { /* skip */ }
+      if (!(await fs.stat(c.dir)).isDirectory()) continue;
+    } catch {
+      continue;
+    }
+
+    const entries = await fs.readdir(c.dir);
+    let files = entries.filter((f) => f.endsWith('.md') || f.endsWith('.txt'));
+
+    // SAFETY: never index all of docs/. Only index explicit public system docs.
+    if (c.tier === 'system') {
+      const allow = new Set(['general-security-standards.md', 'product-knowledge.md']);
+      files = files.filter((f) => allow.has(f));
+    }
+
+    for (const file of files) {
+      const raw = await fs.readFile(path.join(c.dir, file), 'utf8');
+      const parts = splitIntoChunks(raw.replace(/\r\n/g, '\n'));
+      const source = c.tier === 'user' ? `sample-vault/${file}` : `docs/${file}`;
+      parts.forEach((p, idx) => {
+        allChunks.push({ id: `${source}:${idx}`, source, content: p });
+      });
+    }
   }
 
-  if (!vaultDir) { vectorStore = []; return; }
-
-  const entries = await fs.readdir(vaultDir);
-  const files = entries.filter(f => f.endsWith('.md') || f.endsWith('.txt'));
-
-  const allChunks: { id: string; source: string; content: string }[] = [];
-  for (const file of files) {
-    const raw = await fs.readFile(path.join(vaultDir, file), 'utf8');
-    const parts = splitIntoChunks(raw.replace(/\r\n/g, '\n'));
-    parts.forEach((p, idx) => {
-      allChunks.push({ id: `${file}:${idx}`, source: file, content: p });
-    });
-  }
+  vectorStore = vectorStore ?? []; // will be overwritten below
 
   if (allChunks.length === 0) { vectorStore = []; return; }
 
@@ -170,12 +183,15 @@ export interface RAGResult {
 
 /** Convert a filename like "SOC2_Type2_Report_v2.md" → "SOC 2 Type II Report" */
 function humanizeSourceTitle(filename: string): string {
+  const base = filename.split('/').pop() || filename;
   const titleMap: Record<string, string> = {
     'SOC2_Type2_Report_v2.md': 'SOC 2 Type II Report',
     'ISO27001_Policy.md': 'ISO 27001 Information Security Policy',
     'Global_Privacy_Policy.md': 'Global Privacy Policy',
+    'general-security-standards.md': 'General Security Standards',
+    'product-knowledge.md': 'VaultFill Product Knowledge',
   };
-  return titleMap[filename] || filename.replace(/[_-]/g, ' ').replace(/\.md$/i, '');
+  return titleMap[base] || base.replace(/[_-]/g, ' ').replace(/\.md$/i, '');
 }
 
 /** Extract the section heading from a chunk if present */
@@ -195,6 +211,7 @@ export async function queryKnowledgeVaultStructured(
   query: string,
   topK = 6,
   minScore = 0.25,
+  sourcePrefix?: string,
 ): Promise<RAGResult[]> {
   // Lazy init
   if (vectorStore === null) {
@@ -207,11 +224,19 @@ export async function queryKnowledgeVaultStructured(
   if (usePg && pgPool) {
     try {
       const res = await pgPool.query(
-        `SELECT source, content, 1 - (embedding <=> $1::vector) AS score
-         FROM vault_embeddings
-         ORDER BY embedding <=> $1::vector
-         LIMIT $2`,
-        [`[${queryEmb.join(',')}]`, topK],
+        sourcePrefix
+          ? `SELECT source, content, 1 - (embedding <=> $1::vector) AS score
+             FROM vault_embeddings
+             WHERE source LIKE $3
+             ORDER BY embedding <=> $1::vector
+             LIMIT $2`
+          : `SELECT source, content, 1 - (embedding <=> $1::vector) AS score
+             FROM vault_embeddings
+             ORDER BY embedding <=> $1::vector
+             LIMIT $2`,
+        sourcePrefix
+          ? [`[${queryEmb.join(',')}]`, topK, `${sourcePrefix}%`]
+          : [`[${queryEmb.join(',')}]`, topK],
       );
       if (res.rows.length > 0) {
         return res.rows
@@ -232,6 +257,7 @@ export async function queryKnowledgeVaultStructured(
   if (!vectorStore || vectorStore.length === 0) return [];
 
   return vectorStore
+    .filter((ch) => (sourcePrefix ? ch.source.startsWith(sourcePrefix) : true))
     .map((ch) => ({ ch, score: cosine(queryEmb, ch.embedding) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
