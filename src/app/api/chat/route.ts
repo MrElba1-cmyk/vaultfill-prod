@@ -742,9 +742,24 @@ export async function POST(req: Request) {
       trackEvent('onboarding.value_phase', { sessionId, fromState: STATE_LABELS['S3'] });
     }
 
+    // Response headers for UI trust indicators
+    const respSource = intent.intentClass === 'B' ? 'vault' : 'direct';
+    const tier: 'user' | 'system' | 'none' | 'direct' =
+      intent.intentClass === 'B'
+        ? ragResults.some((r) => (r.source || '').startsWith('sample-vault/'))
+          ? 'user'
+          : ragResults.some((r) => (r.source || '').startsWith('docs/'))
+            ? 'system'
+            : 'none'
+        : 'direct';
+
     return new Response(generatedText, {
       status: 200,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-VaultFill-Source': respSource,
+        'X-VaultFill-Knowledge-Tier': tier,
+      },
     });
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
