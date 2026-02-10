@@ -299,6 +299,22 @@ export async function POST(req: Request) {
 
       // Set waiting_for_company so the next message can capture company name
       setWaitingForCompany(sessionId, true);
+
+      // If the user provided an email alongside an obvious signup intent, confirm immediately.
+      // (Prevents "Sign me up — bob@acme.co" from falling into the security/RAG path.)
+      if (/\b(sign\s*me\s*up|sign\s*up|signup|get\s*started|early\s*access|pilot|demo|trial|pricing|book\s+(a\s+)?demo)\b/i.test(query)) {
+        const resp =
+          `Got it — you're signed up for early access!\n\n` +
+          `To tailor the pilot, what's your **company name**?`;
+        recordMessage(sessionId, 'assistant', resp);
+        return new Response(resp, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+          },
+        });
+      }
     }
 
     // ==================================================================
