@@ -158,9 +158,44 @@ async function loadAndIndex(): Promise<void> {
   console.log(`[RAG] Indexed ${embedded.length} chunks in-memory`);
 }
 
-// ---------- query ----------
+// ---------- Structured result type ----------
 
-export async function queryKnowledgeVault(query: string, topK = 4): Promise<string> {
+export interface RAGResult {
+  source: string;
+  /** Human-friendly section title extracted from the source filename */
+  sourceTitle: string;
+  content: string;
+  score: number;
+}
+
+/** Convert a filename like "SOC2_Type2_Report_v2.md" → "SOC 2 Type II Report" */
+function humanizeSourceTitle(filename: string): string {
+  const titleMap: Record<string, string> = {
+    'SOC2_Type2_Report_v2.md': 'SOC 2 Type II Report',
+    'ISO27001_Policy.md': 'ISO 27001 Information Security Policy',
+    'Global_Privacy_Policy.md': 'Global Privacy Policy',
+  };
+  return titleMap[filename] || filename.replace(/[_-]/g, ' ').replace(/\.md$/i, '');
+}
+
+/** Extract the section heading from a chunk if present */
+function extractSectionFromChunk(content: string): string | null {
+  // Look for markdown headings in the chunk
+  const headingMatch = content.match(/^##\s+(.+)/m);
+  if (headingMatch) return headingMatch[1].trim();
+  // Also check for bold section labels like "**Key Management:**"
+  const boldMatch = content.match(/\*\*([^*]+)\*\*/);
+  if (boldMatch) return boldMatch[1].trim().replace(/:$/, '');
+  return null;
+}
+
+// ---------- query (structured) ----------
+
+export async function queryKnowledgeVaultStructured(
+  query: string,
+  topK = 6,
+  minScore = 0.25,
+): Promise<RAGResult[]> {
   // Lazy init
   if (vectorStore === null) {
     usePg = await initPgVector();
@@ -176,12 +211,17 @@ export async function queryKnowledgeVault(query: string, topK = 4): Promise<stri
          FROM vault_embeddings
          ORDER BY embedding <=> $1::vector
          LIMIT $2`,
-        [`[${queryEmb.join(',')}]`, topK]
+        [`[${queryEmb.join(',')}]`, topK],
       );
       if (res.rows.length > 0) {
         return res.rows
-          .map((r: any) => `SOURCE: ${r.source}\n---\n${r.content.trim()}\n---`)
-          .join('\n\n');
+          .filter((r: any) => r.score >= minScore)
+          .map((r: any) => ({
+            source: r.source,
+            sourceTitle: humanizeSourceTitle(r.source),
+            content: r.content.trim(),
+            score: r.score,
+          }));
       }
     } catch (e) {
       console.warn('[RAG] pgvector query failed, falling back:', (e as Error).message);
@@ -189,17 +229,32 @@ export async function queryKnowledgeVault(query: string, topK = 4): Promise<stri
   }
 
   // In-memory fallback
-  if (!vectorStore || vectorStore.length === 0) return '';
+  if (!vectorStore || vectorStore.length === 0) return [];
 
-  const scored = vectorStore
-    .map(ch => ({ ch, score: cosine(queryEmb, ch.embedding) }))
+  return vectorStore
+    .map((ch) => ({ ch, score: cosine(queryEmb, ch.embedding) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
-    .filter(x => x.score > 0.15);
+    .filter((x) => x.score >= minScore)
+    .map(({ ch, score }) => ({
+      source: ch.source,
+      sourceTitle: humanizeSourceTitle(ch.source),
+      content: ch.content,
+      score,
+    }));
+}
 
-  if (scored.length === 0) return '';
+// ---------- query (legacy string interface — kept for compatibility) ----------
 
-  return scored
-    .map(({ ch }) => `SOURCE: ${ch.source}\n---\n${ch.content.trim()}\n---`)
+export async function queryKnowledgeVault(query: string, topK = 4): Promise<string> {
+  const results = await queryKnowledgeVaultStructured(query, topK, 0.15);
+  if (results.length === 0) return '';
+
+  return results
+    .map((r) => `SOURCE: ${r.source}\n---\n${r.content.trim()}\n---`)
     .join('\n\n');
 }
+
+// ---------- Helpers re-exported for use by chat route ----------
+
+export { extractSectionFromChunk };

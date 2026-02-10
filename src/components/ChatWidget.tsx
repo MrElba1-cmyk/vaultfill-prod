@@ -133,12 +133,23 @@ export default function ChatWidget() {
       setIsLoading(true);
 
       try {
+        // Build clean messages array: history (last 9) + current user message = max 10
+        // We send `message` separately AND in the array so the server always has
+        // the current user input even if React state hasn't flushed yet.
+        const historyForApi = messages
+          .filter((m) => m.id !== 'welcome') // skip the static welcome message
+          .slice(-9) // last 9 from history
+          .map((m) => ({ role: m.role, content: m.content }));
+
         const res = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          headers: {
+            'Content-Type': 'application/json',
+            'x-vaultfill-session-id': sessionId,
+          },
+          body: JSON.stringify({
             message: trimmed,
-            messages: messages.slice(-8) // Send last 8 messages for context
+            messages: historyForApi,
           }),
         });
 
