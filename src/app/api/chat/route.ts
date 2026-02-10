@@ -339,7 +339,18 @@ export async function POST(req: Request) {
       );
 
       const extracted = extractUserData(query, ctxCheck.expectedFields);
-      const ackResponse = buildDataAckResponse(extracted, ctxCheck.expectedFields);
+      let ackResponse = buildDataAckResponse(extracted, ctxCheck.expectedFields);
+
+      // If we captured an email but not a company name, explicitly ask for it.
+      // This keeps the signup flow conversion-first and prevents the bot from
+      // treating short inputs like "Apple" as a security query.
+      if (ackResponse && extracted.email && !extracted.company) {
+        setCapturedEmail(sessionId, extracted.email);
+        setWaitingForCompany(sessionId, true);
+        ackResponse =
+          `Got it — you're signed up for early access!\n\n` +
+          `To tailor the pilot, what's your **company name**?`;
+      }
 
       if (ackResponse) {
         // Successfully extracted data — return deterministic response
@@ -376,7 +387,10 @@ export async function POST(req: Request) {
 
         return new Response(ackResponse, {
           status: 200,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+          },
         });
       }
 
@@ -460,11 +474,30 @@ export async function POST(req: Request) {
 
         return new Response(staticResp.text, {
           status: 200,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+          },
         });
       }
 
-      // Class A but needs LLM (affirmative, email_capture) — fall through
+      // Special case: user provided an email but we don't have clear signup context.
+      // Ask one clarifying question instead of punting to the LLM.
+      if (intent.subtype === 'email_capture') {
+        const clarify =
+          `Thanks for sharing your email — just to route this correctly:\n\n` +
+          `Are you looking to **sign up for early access / a pilot**, or do you have a **support question** I can help with?`;
+        recordMessage(sessionId, 'assistant', clarify);
+        return new Response(clarify, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+          },
+        });
+      }
+
+      // Class A but needs LLM (affirmative) — fall through
       // but skip RAG since it's admin-class
       console.log(`[brain:L2] Class A → LLM (subtype: ${intent.subtype}, no RAG needed)`);
     }
