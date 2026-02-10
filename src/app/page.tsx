@@ -495,9 +495,9 @@ export default function Home() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-6 text-xs text-[var(--muted-2)]">
-              <a href="#" className="transition-colors hover:text-[var(--fg)]">Privacy</a>
-              <a href="#" className="transition-colors hover:text-[var(--fg)]">Terms</a>
-              <a href="#" className="transition-colors hover:text-[var(--fg)]">Security</a>
+              <a href="/privacy" className="transition-colors hover:text-[var(--fg)]">Privacy</a>
+              <a href="/terms" className="transition-colors hover:text-[var(--fg)]">Terms</a>
+              <a href="/security" className="transition-colors hover:text-[var(--fg)]">Security</a>
               <span>© {new Date().getFullYear()} VaultFill. All rights reserved.</span>
             </div>
           </div>
