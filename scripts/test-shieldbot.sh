@@ -4,21 +4,25 @@
 
 set -euo pipefail
 
-BASE_URL="${SHIELDBOT_URL:-https://vaultfill-app.vercel.app}"
-ENDPOINT="${BASE_URL}/api/chat"
+# Allow override via env var or first CLI arg
+BASE_URL="${SHIELDBOT_URL:-${1:-https://vaultfill.com}}"
+ENDPOINT="${BASE_URL%/}/api/chat"
 
 MESSAGES=(
-  "how much does it cost?"
-  "soc 2"
-  "I want to be compliant"
-  "I need help preparing for an audit"
-  "what about encryption at rest?"
+  "Do you train AI models on customer data?"
+  "What encryption do you use for data in transit?"
+  "What encryption do you use for data at rest?"
+  "What is your policy on quantum-resistant cryptography?"
+  "Who are your subprocessors?"
 )
 
 PASS=0
 FAIL=0
 CITATION_FOUND=0
+FALLBACK_FOUND=0
 FAILED_DETAILS=()
+
+SECURITY_CLEARANCE_FALLBACK='My current security clearance (context) does not contain the answer to that specific protocol.'
 
 echo "=== Shield Bot Smoke Test ==="
 echo "Endpoint: ${ENDPOINT}"
@@ -72,11 +76,17 @@ for i in "${!MESSAGES[@]}"; do
   fi
 
   # Check 4: Citation detection (tracked globally)
-  if echo "$BODY" | grep -qiP 'Based on .*?(SOC|File:|Section:|Report|Policy)'; then
+  if echo "$BODY" | grep -qi "Based on \["; then
     echo "  ✅ Citation found"
     CITATION_FOUND=1
   else
     echo "  ℹ️  No citation in this response (ok if others have one)"
+  fi
+
+  # Check 5: Fallback detection (tracked globally)
+  if [[ "${BODY//$'\n'/ }" == "$SECURITY_CLEARANCE_FALLBACK" ]]; then
+    echo "  ✅ Security-clearance fallback triggered (expected for some queries)"
+    FALLBACK_FOUND=1
   fi
 
   PASS=$((PASS + 1))
@@ -86,10 +96,20 @@ echo ""
 echo "=== Citation Check ==="
 if [[ "$CITATION_FOUND" -eq 0 ]]; then
   echo "❌ FAIL: No citation found in any of the 5 responses"
-  FAILED_DETAILS+=("Global: No citation (\"Based on [Source]: ...\") found in any response")
+  FAILED_DETAILS+=("Global: No citation (\"Based on [Title, Section]: ...\") found in any response")
   FAIL=$((FAIL + 1))
 else
   echo "✅ At least one response contains a citation"
+fi
+
+echo ""
+echo "=== Fallback Check ==="
+if [[ "$FALLBACK_FOUND" -eq 0 ]]; then
+  echo "❌ FAIL: Expected at least one security-clearance fallback but none were returned"
+  FAILED_DETAILS+=("Global: No security-clearance fallback response detected")
+  FAIL=$((FAIL + 1))
+else
+  echo "✅ At least one response correctly used the security-clearance fallback"
 fi
 
 # Cleanup

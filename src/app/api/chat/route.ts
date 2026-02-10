@@ -130,9 +130,13 @@ function buildSystemPrompt(
 
   let prompt = `You are Shield Bot, VaultFill's AI compliance assistant (SOC 2, ISO 27001, NIST, HIPAA, GDPR).
 
-RULES: Answer immediately. Max 1 follow-up question per response. Be concise with bullets. Cite vault sources as "Based on [Title, Section]: …" — never fabricate citations. No internal state references.
-If pricing asked: "VaultFill offers startup-friendly pricing — plans announced soon. Drop your email for early access."
-After 3+ exchanges, suggest saving analysis via email.
+RULES:
+- Answer immediately. Max 1 follow-up question per response. Be concise with bullets.
+- Cite vault sources as "Based on [Title, Section]: …" — never fabricate citations. No internal state references.
+- Do NOT fabricate, speculate, or infer answers beyond what the KNOWLEDGE_VAULT provides. Every factual claim MUST be grounded in the KNOWLEDGE_VAULT context below.
+- If the KNOWLEDGE_VAULT does not contain information to answer the user's question, respond EXACTLY with: "My current security clearance (context) does not contain the answer to that specific protocol."
+- If pricing asked: "VaultFill offers startup-friendly pricing — plans announced soon. Drop your email for early access."
+- After 3+ exchanges, suggest saving analysis via email.
 `;
 
   // Lean context injection
@@ -307,6 +311,29 @@ export async function POST(req: Request) {
       }
     } catch (ragErr) {
       console.error('[chat] RAG query failed, continuing without context:', ragErr);
+    }
+
+    // ==================================================================
+    // PHASE 3.5: RAG CONFIDENCE GATE — enforce security-clearance fallback
+    // ==================================================================
+    const CONFIDENCE_THRESHOLD = 0.5;
+    const SECURITY_CLEARANCE_FALLBACK =
+      'My current security clearance (context) does not contain the answer to that specific protocol.';
+
+    const topScore = ragResults.length > 0 ? Math.max(...ragResults.map((r) => r.score)) : 0;
+
+    if (topScore < CONFIDENCE_THRESHOLD) {
+      console.log(
+        `[chat] RAG confidence gate triggered — top score ${topScore.toFixed(3)} < threshold ${CONFIDENCE_THRESHOLD}. Returning fallback.`,
+      );
+
+      // Record the fallback as the assistant response
+      recordMessage(sessionId, 'assistant', SECURITY_CLEARANCE_FALLBACK);
+
+      return new Response(SECURITY_CLEARANCE_FALLBACK, {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
     }
 
     // ==================================================================
