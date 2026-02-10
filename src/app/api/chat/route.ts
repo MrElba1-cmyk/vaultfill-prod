@@ -432,6 +432,12 @@ export async function POST(req: Request) {
         error: 'Something went wrong. Please try again.',
         reply:
           'I apologize — I encountered an issue processing your request. Could you please try again?',
+        // DIAGNOSTIC: Include error details temporarily
+        _debug_message: error.message,
+        _debug_name: error.name,
+        _debug_stack: error.stack?.split('\n').slice(0, 5),
+        _debug_openai_key_present: !!process.env.OPENAI_API_KEY,
+        _debug_openai_key_length: process.env.OPENAI_API_KEY?.length ?? 0,
       }),
       {
         status: 500,
