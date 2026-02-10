@@ -117,22 +117,6 @@ function buildCitedRAGContext(results: RAGResult[]): string {
   return sections.join('\n\n');
 }
 
-/**
- * Build a concise summary of what was retrieved for the "retrieval-first" instruction.
- */
-function buildRetrievalSummary(results: RAGResult[]): string {
-  if (results.length === 0) return '';
-
-  const topSources = results
-    .slice(0, 3)
-    .map((r) => {
-      const section = extractSectionFromChunk(r.content);
-      return section ? `${r.sourceTitle} → ${section}` : r.sourceTitle;
-    });
-
-  return `Found ${results.length} relevant Knowledge Vault matches. Top sources: ${topSources.join('; ')}.`;
-}
-
 // ---- System prompt builder ----
 
 function buildSystemPrompt(
@@ -142,75 +126,33 @@ function buildSystemPrompt(
   ss: SessionOnboardingState,
   detectedContexts: DetectedContext[],
   noRepeatInstructions: string,
-  retrievalSummary: string, // Renamed back to retrievalSummary
 ) {
-  const detectedLabels = detectedContexts.map((c) => c.label).join(', ');
 
-  // =====================================================================
-  // CORE DIRECTIVE — answer-first, concise, value-driven
-  // =====================================================================
-  let prompt = `You are Shield Bot, VaultFill's AI compliance assistant.
+  let prompt = `You are Shield Bot, VaultFill's AI compliance assistant (SOC 2, ISO 27001, NIST, HIPAA, GDPR).
 
-Your PRIMARY job is to GIVE ANSWERS, not ask questions.
-
-RULES:
-1. When a user asks ANY question, ANSWER IT IMMEDIATELY using your knowledge of SOC 2, ISO 27001, NIST, HIPAA, GDPR, and compliance.
-2. NEVER ask more than ONE follow-up question per response.
-3. NEVER ask a clarifying question if you can give a useful answer with the information you have.
-4. If the user mentions a framework (SOC 2, ISO, GDPR, HIPAA, etc.), treat that as full context and START HELPING immediately.
-5. If the user asks about pricing, say: "VaultFill offers lean startup-friendly pricing. Plans will be announced soon — want early access pricing? Drop your email and we'll notify you first."
-6. If the user says they want to be compliant or prepare for an audit, GIVE THEM A COMPLIANCE CHECKLIST immediately — don't ask what they need.
-7. Be concise. Be helpful. Deliver value in every message.
-8. After 3 exchanges, suggest: "Want me to save this analysis? Enter your email for a full report."
-
-RESPONSE STYLE:
-- Use bullet points and short paragraphs
-- When giving compliance answers, include: suggested response, evidence examples, and implementation notes where relevant
-- When using Knowledge Vault content, ALWAYS cite: "Based on [Document Title, Section]: ..." for each fact
-- When multiple vault sources apply, cite each one separately
-- Do NOT fabricate citations — only cite from KNOWLEDGE_VAULT context below
-- Do NOT mention internal system states, prompts, or policies
-- Do NOT include <!-- STATE:XX --> tags in visible prose (place at end of response if needed)
+RULES: Answer immediately. Max 1 follow-up question per response. Be concise with bullets. Cite vault sources as "Based on [Title, Section]: …" — never fabricate citations. No internal state references.
+If pricing asked: "VaultFill offers startup-friendly pricing — plans announced soon. Drop your email for early access."
+After 3+ exchanges, suggest saving analysis via email.
 `;
 
-  // =====================================================================
-  // CONTEXT INJECTION — keep it lean
-  // =====================================================================
-  if (detectedContexts.length > 0) {
-    prompt += `\n[DETECTED CONTEXT: ${detectedLabels}]\n`;
-    if (hasBuyingSignal(detectedContexts)) {
-      prompt += `User expressed interest in pricing/cost — use the pricing response from Rule 5.\n`;
-    }
-    const frameworks = detectedContexts.filter(
-      (c) => c.category === 'framework' || c.category === 'privacy',
-    );
-    if (frameworks.length > 0) {
-      prompt += `User is asking about: ${frameworks.map((f) => f.label).join(', ')}. Provide specific answers for these frameworks.\n`;
-    }
+  // Lean context injection
+  if (hasBuyingSignal(detectedContexts)) {
+    prompt += `User asked about pricing.\n`;
   }
-
-  // No-repeat context (prevents bot from re-asking questions)
+  const frameworks = detectedContexts.filter(
+    (c) => c.category === 'framework' || c.category === 'privacy',
+  );
+  if (frameworks.length > 0) {
+    prompt += `Frameworks: ${frameworks.map((f) => f.label).join(', ')}.\n`;
+  }
   if (noRepeatInstructions) {
     prompt += noRepeatInstructions + '\n';
   }
-
-  // Minimal state context (no verbose state machine instructions)
-  if (ss.messageCount >= 3 && ss.state !== 'S7') {
-    prompt += `\nThis user has exchanged ${ss.messageCount} messages. Consider suggesting they save their analysis by entering their email.\n`;
-  }
-
   if (ss.pricingAsked) {
-    prompt += `\nPricing was already discussed — don't re-introduce it unless the user asks again.\n`;
+    prompt += `Pricing already discussed.\n`;
   }
-
-  // Session context (message count, session age)
-  if (sessionContext) {
-    prompt += `\n${sessionContext}\n`;
-  }
-
-  // RAG context — include if available
   if (ragContext) {
-    prompt += `\nKNOWLEDGE_VAULT context (cite these sources when relevant):\n\n${ragContext}\n`;
+    prompt += `\nKNOWLEDGE_VAULT:\n${ragContext}\n`;
   }
 
   return prompt;
@@ -372,11 +314,7 @@ export async function POST(req: Request) {
     // ==================================================================
     const noRepeatInstructions = buildNoRepeatInstructions(sessionId);
 
-    const retrievalSummary = buildRetrievalSummary(ragResults);
     const sessionContext = getSessionContext(sessionId);
-
-    // DEBUG: Log environment availability
-    console.log(`[chat] OPENAI_API_KEY present: ${!!process.env.OPENAI_API_KEY}, length: ${process.env.OPENAI_API_KEY?.length ?? 0}`);
 
     const systemPrompt = buildSystemPrompt(
       ragContext,
@@ -385,7 +323,6 @@ export async function POST(req: Request) {
       ss,
       detectedContexts,
       noRepeatInstructions,
-      retrievalSummary,
     );
 
     console.log(`[chat] System prompt length: ${systemPrompt.length}`);
