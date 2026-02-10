@@ -167,45 +167,26 @@ export default function FloatingChat() {
       });
       if (!res.ok) throw new Error('Failed');
 
-      const contentType = res.headers.get('content-type');
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let responseContent = '';
 
-      if (contentType?.includes('text/plain')) {
-        const reader = res.body?.getReader();
-        const decoder = new TextDecoder();
-        let responseContent = '';
+      if (reader) {
+        const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: '', timestamp: new Date() };
+        setMessages(prev => [...prev, assistantMsg]);
 
-        if (reader) {
-          const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: '', timestamp: new Date() };
-          setMessages(prev => [...prev, assistantMsg]);
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            for (const line of decoder.decode(value).split('\n')) {
-              if (line.startsWith('0:')) {
-                try {
-                  const data = JSON.parse(line.substring(2));
-                  if (typeof data === 'string') {
-                    responseContent += data;
-                    setMessages(prev => {
-                      const updated = [...prev];
-                      const last = updated[updated.length - 1];
-                      if (last?.role === 'assistant') last.content = responseContent;
-                      return updated;
-                    });
-                  }
-                } catch { /* stream parse */ }
-              }
-            }
-          }
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          responseContent += chunk;
+          setMessages(prev => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last?.role === 'assistant') last.content = responseContent;
+            return updated;
+          });
         }
-      } else {
-        const data = await res.json();
-        setMessages(prev => [...prev, {
-          id: `assistant-${Date.now()}`, role: 'assistant',
-          content: data.reply || "I'm having trouble right now. Please try again.",
-          timestamp: new Date(),
-        }]);
       }
 
       // Client-side state detection from the latest assistant message

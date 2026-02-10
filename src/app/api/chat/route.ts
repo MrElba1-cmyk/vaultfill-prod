@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     },
   });
 
-    return result.toUIMessageStreamResponse();
+    return result.toTextStreamResponse();
   } catch (err) {
     console.error('[chat] POST handler error:', err);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
