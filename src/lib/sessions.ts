@@ -15,6 +15,8 @@ type SessionData = {
   contextSummary: string;
   /** Last N messages for short-term memory */
   recentMessages: { role: string; content: string; ts: number }[];
+  /** Receptionist bypass: true when bot has asked for email */
+  waitingForEmail: boolean;
   /** Receptionist bypass: true when bot has asked for company name */
   waitingForCompany: boolean;
   /** Receptionist bypass: email captured from conversation */
@@ -41,6 +43,7 @@ export function getOrCreateSession(sessionId: string): SessionData {
     messageCount: 0,
     contextSummary: '',
     recentMessages: [],
+    waitingForEmail: false,
     waitingForCompany: false,
     capturedEmail: null,
   };
@@ -81,6 +84,16 @@ export function getSessionContext(sessionId: string): string {
 }
 
 // ---- Receptionist bypass state helpers ----
+
+export function setWaitingForEmail(sessionId: string, waiting: boolean): void {
+  const session = getOrCreateSession(sessionId);
+  session.waitingForEmail = waiting;
+}
+
+export function isWaitingForEmail(sessionId: string): boolean {
+  const session = sessions.get(sessionId);
+  return session?.waitingForEmail ?? false;
+}
 
 export function setWaitingForCompany(sessionId: string, waiting: boolean): void {
   const session = getOrCreateSession(sessionId);

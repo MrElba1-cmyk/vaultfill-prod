@@ -11,6 +11,8 @@ import {
   getSessionContext,
   setCapturedEmail,
   getCapturedEmail,
+  setWaitingForEmail,
+  isWaitingForEmail,
   setWaitingForCompany,
   isWaitingForCompany,
 } from '../../../lib/sessions';
@@ -303,6 +305,7 @@ export async function POST(req: Request) {
 
       // Set waiting_for_company so the next message can capture company name
       setWaitingForCompany(sessionId, true);
+      setWaitingForEmail(sessionId, false);
 
       // If the user provided an email alongside an obvious signup intent, confirm immediately.
       // (Prevents "Sign me up — bob@acme.co" from falling into the security/RAG path.)
@@ -330,9 +333,54 @@ export async function POST(req: Request) {
     // Also handles waiting_for_company from the receptionist bypass flow.
     // ==================================================================
 
+    const looksLikeQuestion = /^\s*(how|what|why|when|where|can|could|do|does|is|are|should|would|will)\b/i.test(query);
+    const looksLikeSignupIntent = /\b(sign\s*up|signup|pilot|demo|trial|get\s*started|early\s*access)\b/i.test(query);
+
+    // If we’re waiting for email and user sends anything other than an email, keep asking.
+    if (isWaitingForEmail(sessionId) && !emailHotfixMatch) {
+      if (looksLikeQuestion) {
+        const resp = `You can sign up right here — just type your **email address** to get started.`;
+        recordMessage(sessionId, 'assistant', resp);
+        return new Response(resp, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
+          },
+        });
+      }
+
+      const resp = `Great — to get started, please enter your **email address**.`;
+      recordMessage(sessionId, 'assistant', resp);
+      return new Response(resp, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-VaultFill-Source': 'direct',
+          'X-VaultFill-Knowledge-Tier': 'direct',
+        },
+      });
+    }
+
     // Sub-check: if we're waiting for company name and user didn't send an email
     if (isWaitingForCompany(sessionId) && !emailHotfixMatch) {
       const capturedEmail = getCapturedEmail(sessionId);
+
+      // Zombie fix: never treat questions or signup intent phrases as company name.
+      if (looksLikeQuestion || looksLikeSignupIntent) {
+        const resp = `Almost there — what's your **company name**? (Example: Acme Inc.)`;
+        recordMessage(sessionId, 'assistant', resp);
+        return new Response(resp, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
+          },
+        });
+      }
+
       if (capturedEmail && query.trim().length > 0 && query.trim().length < 200) {
         const companyName = query.trim();
         console.log(`[L1:receptionist] Company name captured: "${companyName}" for ${capturedEmail}`);
@@ -424,6 +472,21 @@ export async function POST(req: Request) {
     // ==================================================================
     // ██  LAYER 2: INTENT CLASSIFIER — Class A vs Class B
     // ==================================================================
+    // If user asks how to sign up (question form), force signup flow (WAITING_FOR_EMAIL)
+    if (/\b(sign\s*up|signup|get\s*started|early\s*access|pilot|demo)\b/i.test(query) && /^\s*(how|what|can|could|do|does|is|are|should|would|will)\b/i.test(query)) {
+      setWaitingForEmail(sessionId, true);
+      const resp = `You can sign up right here. Just type your **email address** to get started.`;
+      recordMessage(sessionId, 'assistant', resp);
+      return new Response(resp, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-VaultFill-Source': 'direct',
+          'X-VaultFill-Knowledge-Tier': 'direct',
+        },
+      });
+    }
+
     const intent = classifyIntent(query);
 
     console.log(
@@ -497,6 +560,13 @@ export async function POST(req: Request) {
 
       if (staticResp && !staticResp.useLLM) {
         console.log(`[brain:L2] Class A static response for "${intent.subtype}"`);
+
+        // Zombie fix: if user is asking to sign up, move session into WAITING_FOR_EMAIL.
+        if (intent.subtype === 'signup_pricing') {
+          setWaitingForEmail(sessionId, true);
+          setWaitingForCompany(sessionId, false);
+        }
+
         recordMessage(sessionId, 'assistant', staticResp.text);
         updateFromBotResponse(sessionId, staticResp.text);
 
@@ -709,8 +779,36 @@ export async function POST(req: Request) {
       temperature: 0.3,
     });
 
-    const generatedText = genResult.text;
+    let generatedText = genResult.text;
     console.log(`[chat] generateText succeeded, text length: ${generatedText.length}`);
+
+    // ================================================================
+    // Deterministic citations footer (Option A)
+    // If RAG was used and the model did not emit a citation, append one.
+    // ================================================================
+    const hasCitation = /Based on \[[^\]]+\]/i.test(generatedText);
+    if (intent.intentClass === 'B' && ragResults.length > 0 && !hasCitation) {
+      const top = ragResults[0];
+      const topSection = extractSectionFromChunk(top.content) || 'Overview';
+      const topRef = `${top.sourceTitle}, ${topSection}`;
+
+      const uniq: Array<{ title: string; section: string; source: string }> = [];
+      const seen = new Set<string>();
+      for (const r of ragResults) {
+        const section = extractSectionFromChunk(r.content) || 'Overview';
+        const key = `${r.sourceTitle}__${section}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        uniq.push({ title: r.sourceTitle, section, source: r.source });
+      }
+
+      const sourcesBlock =
+        `\n\nBased on [${topRef}]:\n` +
+        `Sources:\n` +
+        uniq.slice(0, 3).map((s) => `- ${s.title} — ${s.section} (${s.source})`).join('\n');
+
+      generatedText = `${generatedText.trim()}${sourcesBlock}\n`;
+    }
 
     // Record the response
     recordMessage(sessionId, 'assistant', generatedText);

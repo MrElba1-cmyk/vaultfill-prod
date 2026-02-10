@@ -360,12 +360,8 @@ export function getStaticResponse(subtype: IntentSubtype): StaticResponse | null
     case 'signup_pricing':
       return {
         text:
-          "Great to hear you're interested! 🚀 VaultFill automates security questionnaires " +
-          "so your team can close deals faster.\n\n" +
-          "Drop your **email** and **company name**, and the VaultFill team will reach out to get you set up. " +
-          "You can also use the form on this page to request early access.\n\n" +
-          "In the meantime, feel free to ask me anything about SOC 2, ISO 27001, encryption, " +
-          "or how VaultFill works — I'm here to help!",
+          "Great — let’s get you set up.\n\n" +
+          "To get started, please type your **email address**.",
         useLLM: false,
       };
 
