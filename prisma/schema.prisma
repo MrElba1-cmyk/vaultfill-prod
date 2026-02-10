@@ -31,6 +31,8 @@ model Lead {
   role           String?
   tier           String?
   source         String?  @default("web")
+  companyName    String?  @map("company_name")
+  status         String?  @default("new")
 
   @@map("leads")
 }

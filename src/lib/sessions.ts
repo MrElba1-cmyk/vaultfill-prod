@@ -15,6 +15,10 @@ type SessionData = {
   contextSummary: string;
   /** Last N messages for short-term memory */
   recentMessages: { role: string; content: string; ts: number }[];
+  /** Receptionist bypass: true when bot has asked for company name */
+  waitingForCompany: boolean;
+  /** Receptionist bypass: email captured from conversation */
+  capturedEmail: string | null;
 };
 
 const MAX_RECENT = 20;
@@ -37,6 +41,8 @@ export function getOrCreateSession(sessionId: string): SessionData {
     messageCount: 0,
     contextSummary: '',
     recentMessages: [],
+    waitingForCompany: false,
+    capturedEmail: null,
   };
   sessions.set(sessionId, session);
   return session;
@@ -72,6 +78,28 @@ export function getSessionContext(sessionId: string): string {
   ctx += `This anonymous user has sent ${session.messageCount} messages in this session. `;
   ctx += `Session started ${new Date(session.createdAt).toISOString()}.`;
   return ctx;
+}
+
+// ---- Receptionist bypass state helpers ----
+
+export function setWaitingForCompany(sessionId: string, waiting: boolean): void {
+  const session = getOrCreateSession(sessionId);
+  session.waitingForCompany = waiting;
+}
+
+export function isWaitingForCompany(sessionId: string): boolean {
+  const session = sessions.get(sessionId);
+  return session?.waitingForCompany ?? false;
+}
+
+export function setCapturedEmail(sessionId: string, email: string): void {
+  const session = getOrCreateSession(sessionId);
+  session.capturedEmail = email;
+}
+
+export function getCapturedEmail(sessionId: string): string | null {
+  const session = sessions.get(sessionId);
+  return session?.capturedEmail ?? null;
 }
 
 // Periodic cleanup

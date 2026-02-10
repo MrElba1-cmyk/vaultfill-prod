@@ -19,6 +19,8 @@ export interface Lead {
   role?: string;
   tier?: string;
   source?: string;
+  companyName?: string;
+  status?: string;
 }
 
 // ---------- Prisma path ----------
@@ -48,6 +50,8 @@ async function upsertLeadPrisma(lead: Lead): Promise<boolean> {
       role: lead.role || null,
       tier: lead.tier || null,
       source: lead.source || "web",
+      companyName: lead.companyName || null,
+      status: lead.status || "new",
     },
     update: {
       userAgent: lead.ua || undefined,
@@ -56,6 +60,8 @@ async function upsertLeadPrisma(lead: Lead): Promise<boolean> {
       primaryFormats: lead.primaryFormats || undefined,
       role: lead.role || undefined,
       tier: lead.tier || undefined,
+      companyName: lead.companyName || undefined,
+      status: lead.status || undefined,
     },
   });
   return true;
@@ -76,6 +82,8 @@ async function getAllLeadsPrisma(): Promise<Lead[]> {
     role: r.role || undefined,
     tier: r.tier || undefined,
     source: r.source || undefined,
+    companyName: r.companyName || undefined,
+    status: r.status || undefined,
   }));
 }
 

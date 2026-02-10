@@ -175,6 +175,8 @@ export async function POST(req: Request) {
       role: body.role,
       tier,
       source: "web",
+      companyName: sanitizedCompany || undefined,
+      status: "new",
     };
 
     // DATABASE-FIRST: Write to secure database BEFORE any notifications
