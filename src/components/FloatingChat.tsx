@@ -17,6 +17,8 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  /** Knowledge tier used for this assistant response (if provided by server) */
+  knowledgeTier?: 'user' | 'system' | 'none' | 'direct';
 }
 
 const WELCOME_MESSAGE: ChatMessage = {
@@ -184,8 +186,24 @@ export default function FloatingChat() {
       const decoder = new TextDecoder();
       let responseContent = '';
 
+      const knowledgeTierHeader = (res.headers.get('x-vaultfill-knowledge-tier') || '').toLowerCase();
+      const knowledgeTier: ChatMessage['knowledgeTier'] =
+        knowledgeTierHeader === 'user'
+          ? 'user'
+          : knowledgeTierHeader === 'system'
+            ? 'system'
+            : knowledgeTierHeader === 'direct'
+              ? 'direct'
+              : 'none';
+
       if (reader) {
-        const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: '', timestamp: new Date() };
+        const assistantMsg: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          knowledgeTier,
+        };
         setMessages(prev => [...prev, assistantMsg]);
 
         while (true) {
@@ -431,6 +449,25 @@ export default function FloatingChat() {
                             }
                       }
                     >
+                      {msg.role === 'assistant' && (msg.knowledgeTier === 'user' || msg.knowledgeTier === 'system') && (
+                        <div className="mb-2 flex items-center gap-2">
+                          <span
+                            className="inline-flex items-center gap-2 rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                            style={{
+                              borderColor: 'var(--border)',
+                              background: msg.knowledgeTier === 'user' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                              color: 'var(--fg)',
+                            }}
+                            aria-label={msg.knowledgeTier === 'user' ? 'Verified Policy (your data)' : 'General Guidance (system data)'}
+                          >
+                            <span
+                              className="inline-block h-2 w-2 rounded-full"
+                              style={{ background: msg.knowledgeTier === 'user' ? '#10b981' : '#f59e0b' }}
+                            />
+                            {msg.knowledgeTier === 'user' ? 'Verified Policy' : 'General Guidance'}
+                          </span>
+                        </div>
+                      )}
                       {renderContent(msg.content)}
                     </div>
                   </motion.div>

@@ -316,6 +316,7 @@ export async function POST(req: Request) {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
           },
         });
       }
@@ -410,6 +411,7 @@ export async function POST(req: Request) {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
           },
         });
       }
@@ -525,6 +527,7 @@ export async function POST(req: Request) {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'X-VaultFill-Source': 'direct',
+            'X-VaultFill-Knowledge-Tier': 'direct',
           },
         });
       }
@@ -560,6 +563,7 @@ export async function POST(req: Request) {
             headers: {
               'Content-Type': 'text/plain; charset=utf-8',
               'X-VaultFill-Source': 'vault',
+              'X-VaultFill-Knowledge-Tier': 'system',
             },
           });
         }
@@ -582,6 +586,7 @@ export async function POST(req: Request) {
               headers: {
                 'Content-Type': 'text/plain; charset=utf-8',
                 'X-VaultFill-Source': 'vault',
+                'X-VaultFill-Knowledge-Tier': 'system',
               },
             });
           }
@@ -647,7 +652,13 @@ export async function POST(req: Request) {
         }),
       );
 
-      if (topScore < CONFIDENCE_THRESHOLD) {
+      // PROACTIVE MODE: if system docs matched reasonably well, answer immediately with general guidance
+      // instead of presenting a menu.
+      const usedSystemDocs = ragResults.some((r) => (r.source || '').startsWith('docs/'));
+      const SYSTEM_ANSWER_THRESHOLD = 0.35;
+      if (usedSystemDocs && topScore >= SYSTEM_ANSWER_THRESHOLD) {
+        // proceed to LLM with system-doc context + disclaimer (already prefixed in ragContext)
+      } else if (topScore < CONFIDENCE_THRESHOLD) {
         console.log(
           `[brain:L3] Soft fallback triggered — top score ${topScore.toFixed(3)} < ${CONFIDENCE_THRESHOLD}`,
         );
@@ -665,6 +676,7 @@ export async function POST(req: Request) {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
             'X-VaultFill-Source': 'vault',
+            'X-VaultFill-Knowledge-Tier': usedSystemDocs ? 'system' : 'none',
           },
         });
       }
