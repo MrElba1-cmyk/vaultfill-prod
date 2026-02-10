@@ -125,7 +125,7 @@ function buildSystemPrompt(
   ss: SessionOnboardingState,
   detectedContexts: DetectedContext[],
   noRepeatInstructions: string,
-  _retrievalSummary: string,
+  retrievalSummary: string, // Renamed back to retrievalSummary
 ) {
   const detectedLabels = detectedContexts.map((c) => c.label).join(', ');
 
@@ -324,31 +324,32 @@ export async function POST(req: Request) {
     }
 
     // ==================================================================
-    // PHASE 3: RETRIEVAL-FIRST — ALWAYS query Knowledge Vault
+    // PHASE 3: RETRIEVAL-FIRST — ALWAYS query Knowledge Vault (temporarily disabled for debugging)
     // ==================================================================
     let ragResults: RAGResult[] = [];
     let ragContext = '';
+    // const retrievalSummary = ''; // No retrieval summary if RAG is disabled
 
-    try {
-      if (query) {
-        // Build augmented query using detected frameworks/topics for better recall
-        const augmentedQuery = buildAugmentedQuery(query, detectedContexts);
+    // try {
+    //   if (query) {
+    //     // Build augmented query using detected frameworks/topics for better recall
+    //     const augmentedQuery = buildAugmentedQuery(query, detectedContexts);
 
-        console.log(`[chat] RAG query: "${augmentedQuery.slice(0, 120)}..."`);
+    //     console.log(`[chat] RAG query: "${augmentedQuery.slice(0, 120)}..."`);
 
-        // Query with structured results
-        ragResults = await queryKnowledgeVaultStructured(augmentedQuery, 6, 0.20);
+    //     // Query with structured results
+    //     ragResults = await queryKnowledgeVaultStructured(augmentedQuery, 6, 0.20);
 
-        console.log(
-          `[chat] RAG returned ${ragResults.length} results. Top scores: [${ragResults.slice(0, 3).map((r) => r.score.toFixed(3)).join(', ')}]`,
-        );
+    //     console.log(
+    //       `[chat] RAG returned ${ragResults.length} results. Top scores: [${ragResults.slice(0, 3).map((r) => r.score.toFixed(3)).join(', ')}]`,
+    //     );
 
-        // Build citation-annotated context
-        ragContext = buildCitedRAGContext(ragResults);
-      }
-    } catch (ragErr) {
-      console.error('[chat] RAG query failed, continuing without context:', ragErr);
-    }
+    //     // Build citation-annotated context
+    //     ragContext = buildCitedRAGContext(ragResults);
+    //   }
+    // } catch (ragErr) {
+    //   console.error('[chat] RAG query failed, continuing without context:', ragErr);
+    // }
 
     // ==================================================================
     // PHASE 4: BUILD NO-REPEAT INSTRUCTIONS
