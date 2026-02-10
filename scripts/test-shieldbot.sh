@@ -14,13 +14,16 @@ MESSAGES=(
   "What encryption do you use for data at rest?"
   "What is your policy on quantum-resistant cryptography?"
   "Who are your subprocessors?"
+  "I want to sign up"
 )
 
 PASS=0
 FAIL=0
 CITATION_FOUND=0
 FALLBACK_FOUND=0
+CONVERSION_INTENT_OK=0
 FAILED_DETAILS=()
+TOTAL_MESSAGES=${#MESSAGES[@]}
 
 SECURITY_CLEARANCE_FALLBACK='My current security clearance (context) does not contain the answer to that specific protocol.'
 
@@ -31,7 +34,7 @@ echo ""
 for i in "${!MESSAGES[@]}"; do
   msg="${MESSAGES[$i]}"
   idx=$((i + 1))
-  echo "--- Test ${idx}/5: \"${msg}\" ---"
+  echo "--- Test ${idx}/${TOTAL_MESSAGES}: \"${msg}\" ---"
 
   # Use a unique session per message to get independent responses (maximizes citation coverage)
   SESSION_ID="smoke-test-$$-${idx}"
@@ -89,6 +92,25 @@ for i in "${!MESSAGES[@]}"; do
     FALLBACK_FOUND=1
   fi
 
+  # Check 6: Conversion intent — "I want to sign up" must NOT return fallback
+  if [[ "$msg" == "I want to sign up" ]]; then
+    if echo "$BODY" | grep -qi "security clearance"; then
+      echo "  ❌ FAIL: Conversion intent 'I want to sign up' returned security-clearance fallback"
+      FAILED_DETAILS+=("Test ${idx} (\"${msg}\"): Conversion intent hit security-clearance fallback")
+      FAIL=$((FAIL + 1))
+      continue
+    else
+      echo "  ✅ Conversion intent did NOT trigger security-clearance fallback"
+      CONVERSION_INTENT_OK=1
+    fi
+    # Verify it contains a CTA keyword
+    if echo "$BODY" | grep -qi "email\|reach out\|early access"; then
+      echo "  ✅ Conversion intent contains CTA language"
+    else
+      echo "  ⚠️  Conversion intent response missing expected CTA language"
+    fi
+  fi
+
   PASS=$((PASS + 1))
 done
 
@@ -110,6 +132,16 @@ if [[ "$FALLBACK_FOUND" -eq 0 ]]; then
   FAIL=$((FAIL + 1))
 else
   echo "✅ At least one response correctly used the security-clearance fallback"
+fi
+
+echo ""
+echo "=== Conversion Intent Check ==="
+if [[ "$CONVERSION_INTENT_OK" -eq 0 ]]; then
+  echo "❌ FAIL: 'I want to sign up' did not pass conversion intent bypass"
+  FAILED_DETAILS+=("Global: Conversion intent bypass not confirmed")
+  FAIL=$((FAIL + 1))
+else
+  echo "✅ Conversion intent correctly bypassed security-clearance fallback"
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
