@@ -103,15 +103,47 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function stripHtmlTags(str: string): string {
+  return str.replace(/<[^>]*>/g, '').trim();
+}
+
+function containsScriptTags(str: string): boolean {
+  return /<script[\s>]/i.test(str) || /javascript:/i.test(str) || /on\w+\s*=/i.test(str);
+}
+
+function sanitizeField(value: unknown, maxLength: number): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  const str = String(value);
+  if (containsScriptTags(str)) return null as any; // signal rejection
+  return stripHtmlTags(str).substring(0, maxLength) || undefined;
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
       email?: string;
+      name?: string;
+      company?: string;
       monthlyVolume?: LeadInput["monthlyVolume"];
       currentProcess?: LeadInput["currentProcess"];
       primaryFormats?: LeadInput["primaryFormats"];
       role?: LeadInput["role"];
     };
+
+    // Input validation: reject payloads with script tags in name/company
+    const rawName = body.name ?? '';
+    const rawCompany = body.company ?? '';
+    if (containsScriptTags(rawName) || containsScriptTags(rawCompany)) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_input", detail: "HTML/script tags are not allowed in name or company fields" },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize and enforce max lengths
+    const sanitizedName = stripHtmlTags(rawName).substring(0, 100);
+    const sanitizedCompany = stripHtmlTags(rawCompany).substring(0, 200);
+
     const email = (body.email ?? "").trim().toLowerCase();
 
     if (!email || !isValidEmail(email)) {

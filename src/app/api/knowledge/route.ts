@@ -127,6 +127,17 @@ function parseKnowledgeVault(): ParsedDocument[] {
 
 export async function GET(req: Request) {
   try {
+    // AUTH: Require API key or internal session
+    const apiKey = req.headers.get('x-api-key') || new URL(req.url).searchParams.get('api_key');
+    const expectedKey = process.env.KNOWLEDGE_API_KEY || process.env.API_SECRET_KEY;
+    
+    if (!expectedKey || apiKey !== expectedKey) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Provide a valid x-api-key header.' },
+        { status: 401 }
+      );
+    }
+
     const url = new URL(req.url);
     const docId = url.searchParams.get('docId');
     

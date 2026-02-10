@@ -33,7 +33,7 @@ export function proxy(_request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires unsafe-inline/eval in dev; tighten with nonces in production
+      "script-src 'self' 'unsafe-inline'", // unsafe-eval removed for security; unsafe-inline kept for Next.js hydration
       "style-src 'self' 'unsafe-inline'", // Tailwind + Framer Motion inject inline styles
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com",
