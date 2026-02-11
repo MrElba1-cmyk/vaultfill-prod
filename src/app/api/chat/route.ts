@@ -16,7 +16,7 @@ import {
   setWaitingForCompany,
   isWaitingForCompany,
 } from '../../../lib/sessions';
-import { saveLead } from '../../../lib/leads-db';
+import { saveLead, getBillingTier, type BillingTier } from '../../../lib/leads-db';
 import {
   hasOfficialStandardsSearchConfigured,
   searchOfficialStandards,
@@ -265,6 +265,21 @@ export async function POST(req: Request) {
     if (ss.state === 'S1' && ss.messageCount >= 1) {
       ss.state = 'S2';
     }
+
+    // ── Tier resolution ──────────────────────────────────────────────
+    // If the session already captured an email, resolve their billing tier
+    // so downstream logic can gate features (e.g. growth-only RAG depth).
+    const capturedEmailForTier = getCapturedEmail(sessionId);
+    let sessionBillingTier: BillingTier = 'free';
+    if (capturedEmailForTier) {
+      try {
+        sessionBillingTier = await getBillingTier(capturedEmailForTier);
+      } catch {
+        // Non-fatal — default to free
+      }
+    }
+    // Expose tier in response headers so the frontend can adapt UI
+    const tierHeader = sessionBillingTier; // will be set on every response path
 
     // Extract latest user query
     const lastUser = [...messages].reverse().find((m) => m.role === 'user');
@@ -903,6 +918,7 @@ export async function POST(req: Request) {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-VaultFill-Source': respSource,
         'X-VaultFill-Knowledge-Tier': tier,
+        'X-VaultFill-Billing-Tier': sessionBillingTier,
       },
     });
   } catch (err: unknown) {

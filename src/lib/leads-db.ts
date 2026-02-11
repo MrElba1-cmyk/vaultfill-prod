@@ -116,6 +116,60 @@ async function getAllLeadsJson(): Promise<Lead[]> {
   }
 }
 
+// ---------- Single-lead lookup ----------
+
+async function getLeadByEmailPrisma(email: string): Promise<Lead | null> {
+  const prisma = await getPrisma();
+  if (!prisma) return null;
+
+  const row = await prisma.lead.findUnique({ where: { email } });
+  if (!row) return null;
+
+  return {
+    email: row.email,
+    createdAt: row.createdAt.toISOString(),
+    ua: row.userAgent || undefined,
+    monthlyVolume: row.monthlyVolume || undefined,
+    currentProcess: row.currentProcess || undefined,
+    primaryFormats: row.primaryFormats || undefined,
+    role: row.role || undefined,
+    tier: row.tier || undefined,
+    source: row.source || undefined,
+    companyName: row.companyName || undefined,
+    status: row.status || undefined,
+  };
+}
+
+async function getLeadByEmailJson(email: string): Promise<Lead | null> {
+  const all = await getAllLeadsJson();
+  return all.find((l) => l.email === email) || null;
+}
+
+// ---------- Billing tier helpers ----------
+
+/**
+ * Canonical billing tiers derived from Lead.status.
+ * "free" means no paid entitlement detected.
+ */
+export type BillingTier = "free" | "core" | "growth";
+
+/**
+ * Parse a billing tier from the Lead.status string.
+ *
+ * Convention: status = "paid:<tier>" (e.g. "paid:core", "paid:growth").
+ * Anything else (null, "new", etc.) → "free".
+ */
+export function parseBillingTier(status: string | null | undefined): BillingTier {
+  if (!status) return "free";
+  const match = status.match(/^paid:(\w+)$/);
+  if (!match) return "free";
+  const raw = match[1].toLowerCase();
+  if (raw === "growth") return "growth";
+  if (raw === "core") return "core";
+  // Unknown paid tier — treat as core (safe default)
+  return "core";
+}
+
 // ---------- Public API ----------
 
 function hasDatabase(): boolean {
@@ -149,4 +203,28 @@ export async function getAllLeads(): Promise<Lead[]> {
     }
   }
   return await getAllLeadsJson();
+}
+
+/**
+ * Fetch a single lead by email. Returns null if not found.
+ */
+export async function getLeadByEmail(email: string): Promise<Lead | null> {
+  const normalized = email.toLowerCase().trim();
+  if (hasDatabase()) {
+    try {
+      return await getLeadByEmailPrisma(normalized);
+    } catch (err) {
+      console.error("[LeadDB] Prisma lookup failed, falling back to JSON:", err);
+    }
+  }
+  return await getLeadByEmailJson(normalized);
+}
+
+/**
+ * Convenience: resolve billing tier for an email address.
+ * Returns "free" if lead not found or not paid.
+ */
+export async function getBillingTier(email: string): Promise<BillingTier> {
+  const lead = await getLeadByEmail(email);
+  return parseBillingTier(lead?.status);
 }
