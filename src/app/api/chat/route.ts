@@ -1,5 +1,5 @@
 import { generateText } from 'ai';
-import { activeModel } from '../../../lib/ai';
+import { chatModel } from '../../../lib/ai';
 import {
   queryKnowledgeVaultStructured,
   extractSectionFromChunk,
@@ -800,7 +800,7 @@ export async function POST(req: Request) {
     console.log(`[chat] About to call generateText with model gpt-4o-mini`);
 
     const genResult = await generateText({
-      model: activeModel,
+      model: chatModel,
       system: systemPrompt,
       messages,
       temperature: 0.3,

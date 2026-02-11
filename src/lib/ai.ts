@@ -1,44 +1,44 @@
 import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 /**
- * Hybrid Intelligence Core
+ * Burn & Switch Protocol (Hybrid Intelligence Core)
  *
- * Switch between a local OpenAI-compatible provider (e.g., Ollama) and OpenAI cloud.
+ * Routing rules:
+ * - Chat / audit logic → Anthropic (quality)
+ * - Vision/OCR → OpenAI (burn vision credits)
+ * - Background ingestion / long-context → Google (burn long-context credits)
  *
- * ENV:
- * - USE_LOCAL_LLM="true" | "false"
- * - LOCAL_LLM_BASE_URL="http://localhost:11434/v1"
- * - LOCAL_LLM_MODEL="qwen3-coder:480b"
- * - LOCAL_LLM_API_KEY="ollama"
- * - OPENAI_API_KEY
+ * IMPORTANT: We fail-safe.
+ * If a provider API key is missing at runtime, we fall back to OpenAI.
  */
 
-function boolEnv(v: string | undefined): boolean {
-  return (v ?? '').toLowerCase() === 'true';
+const openaiProvider = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropicProvider = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const googleProvider = createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_API_KEY });
+
+function hasKey(v?: string) {
+  return !!v && v.trim().length > 10;
 }
 
-const useLocal = boolEnv(process.env.USE_LOCAL_LLM);
-
-const localProvider = createOpenAI({
-  baseURL: process.env.LOCAL_LLM_BASE_URL,
-  apiKey: process.env.LOCAL_LLM_API_KEY || 'ollama',
-});
-
-const cloudProvider = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-/**
- * Active model for chat completions.
- *
- * Notes:
- * - In production (Vercel), you typically want USE_LOCAL_LLM=false.
- * - If local env vars are missing, we fall back to cloud.
- */
-export const activeModel = (() => {
-  if (useLocal && process.env.LOCAL_LLM_BASE_URL && process.env.LOCAL_LLM_MODEL) {
-    return localProvider(process.env.LOCAL_LLM_MODEL);
+/** Primary model for /api/chat */
+export const chatModel = (() => {
+  if (hasKey(process.env.ANTHROPIC_API_KEY)) {
+    // Claude Sonnet (quality)
+    return anthropicProvider('claude-3-5-sonnet-latest');
   }
-  // Default cloud model
-  return cloudProvider('gpt-4o-mini');
+  // Fail-safe fallback
+  return openaiProvider('gpt-4o-mini');
+})();
+
+/** Vision/OCR model (used by evidence pipeline where applicable) */
+export const visionModel = openaiProvider('gpt-4o');
+
+/** Background ingestion / long-context model (not yet wired into embeddings) */
+export const ingestionModel = (() => {
+  if (hasKey(process.env.GOOGLE_API_KEY)) {
+    return googleProvider('gemini-1.5-pro');
+  }
+  return openaiProvider('gpt-4o-mini');
 })();
