@@ -10,6 +10,27 @@ import {
   STATE_LABELS,
 } from '../lib/onboardingStateMachine';
 
+/* ─── Stripe checkout helper ─── */
+
+async function startStripeCheckout(): Promise<void> {
+  try {
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (data.ok && data.url) {
+      window.location.href = data.url;
+    } else {
+      console.error('[stripe] Checkout failed:', data.error);
+      alert('Unable to start checkout. Please try again.');
+    }
+  } catch (err) {
+    console.error('[stripe] Checkout error:', err);
+    alert('Unable to start checkout. Please try again.');
+  }
+}
+
 /* ─── Types & constants ─── */
 
 interface ChatMessage {
@@ -108,6 +129,7 @@ export default function FloatingChat() {
   const [showRebrandBanner, setShowRebrandBanner] = useState(false);
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [onboardingState, setOnboardingState] = useState<OnboardingState>('S1');
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -143,7 +165,7 @@ export default function FloatingChat() {
   const prevOpen = useRef(isOpen);
   useEffect(() => {
     if (prevOpen.current && !isOpen) {
-      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6'];
+      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6', 'S8'];
       if (dropOffStates.includes(onboardingState)) {
         trackEvent('onboarding.drop_off', {
           sessionId,
@@ -172,7 +194,7 @@ export default function FloatingChat() {
         .slice(-7) // last 7 + current message = 8 max
         .map(m => ({
           role: m.role,
-          content: m.content.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim(),
+          content: m.content.replace(/<!--\s*STATE:\s*S[1-8]\s*-->/g, '').trim(),
         }));
 
       const res = await fetch('/api/chat', {
@@ -212,7 +234,7 @@ export default function FloatingChat() {
           const chunk = decoder.decode(value, { stream: true });
           responseContent += chunk;
           // Strip STATE tags before showing to user / storing in history
-          const displayContent = responseContent.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim();
+          const displayContent = responseContent.replace(/<!--\s*STATE:\s*S[1-8]\s*-->/g, '').trim();
           setMessages(prev => {
             const updated = [...prev];
             const last = updated[updated.length - 1];
@@ -259,7 +281,7 @@ export default function FloatingChat() {
   /* Track drop-off on page unload */
   useEffect(() => {
     const handleUnload = () => {
-      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6'];
+      const dropOffStates: OnboardingState[] = ['S3', 'S4', 'S5', 'S6', 'S8'];
       if (dropOffStates.includes(onboardingState)) {
         trackEvent('onboarding.drop_off', {
           sessionId,
@@ -279,7 +301,7 @@ export default function FloatingChat() {
 
   /* Markdown-lite — also strips any <!-- STATE:XX --> tags from display */
   const renderContent = (content: string) =>
-    content.replace(/<!--\s*STATE:\s*S[1-7]\s*-->/g, '').trim().split('\n').map((line, i) => (
+    content.replace(/<!--\s*STATE:\s*S[1-8]\s*-->/g, '').trim().split('\n').map((line, i) => (
       <p key={i} className={line === '' ? 'h-2' : ''}>
         {line.split(/(\*\*.*?\*\*|\*.*?\*)/).map((part, j) => {
           if (part.startsWith('**') && part.endsWith('**'))
@@ -483,6 +505,46 @@ export default function FloatingChat() {
                         <span key={delay} className="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted-2)]" style={{ animationDelay: `${delay}ms` }} />
                       ))}
                     </div>
+                  </motion.div>
+                )}
+
+                {/* Payment Gate CTA — shown when state reaches S8 */}
+                {onboardingState === 'S8' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                    className="flex justify-center py-3"
+                  >
+                    <button
+                      onClick={async () => {
+                        setIsCheckoutLoading(true);
+                        trackEvent('onboarding.checkout_clicked', {
+                          sessionId,
+                          fromState: STATE_LABELS[onboardingState],
+                          messageCount: messages.length,
+                        });
+                        await startStripeCheckout();
+                        setIsCheckoutLoading(false);
+                      }}
+                      disabled={isCheckoutLoading}
+                      className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
+                      style={{
+                        background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                        boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+                      }}
+                    >
+                      {isCheckoutLoading ? (
+                        <>
+                          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Processing…
+                        </>
+                      ) : (
+                        <>
+                          🔓 Unlock Full Report
+                        </>
+                      )}
+                    </button>
                   </motion.div>
                 )}
 

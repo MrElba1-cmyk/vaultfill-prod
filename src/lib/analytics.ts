@@ -11,6 +11,8 @@ type OnboardingEvent =
   | 'onboarding.demo_initiated'
   | 'onboarding.lead_captured'
   | 'onboarding.value_phase'
+  | 'onboarding.payment_gate_shown'
+  | 'onboarding.checkout_clicked'
   | 'onboarding.drop_off';
 
 interface EventProperties {

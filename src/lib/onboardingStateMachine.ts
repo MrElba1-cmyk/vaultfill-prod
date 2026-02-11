@@ -7,7 +7,7 @@
  * v2 — flexible transitions, user-input detection, pricing handling, anti-loop guards.
  */
 
-export type OnboardingState = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7';
+export type OnboardingState = 'S1' | 'S2' | 'S3' | 'S4' | 'S5' | 'S6' | 'S7' | 'S8';
 
 export const STATE_LABELS: Record<OnboardingState, string> = {
   S1: 'Greeting',
@@ -17,6 +17,7 @@ export const STATE_LABELS: Record<OnboardingState, string> = {
   S5: 'Objection Handling',
   S6: 'Soft CTA',
   S7: 'Convert / Lead Capture',
+  S8: 'Payment Gate',
 };
 
 // ---------------------------------------------------------------------------
@@ -30,7 +31,8 @@ const TRANSITIONS: Record<OnboardingState, OnboardingState[]> = {
   S4: ['S5', 'S6'],
   S5: ['S4', 'S6'],                // Objection can loop back to value or advance
   S6: ['S7', 'S4'],                // Soft CTA can convert or loop back
-  S7: [],                           // terminal
+  S7: ['S8'],                       // Lead captured → payment gate
+  S8: ['S4'],                       // Decline loops back to value; otherwise terminal
 };
 
 export function canTransition(from: OnboardingState, to: OnboardingState): boolean {
@@ -45,7 +47,7 @@ export function getNextStates(current: OnboardingState): OnboardingState[] {
 // Detect state from LLM response (HTML comment tags)
 // ---------------------------------------------------------------------------
 export function detectStateFromResponse(response: string): OnboardingState | null {
-  const match = response.match(/<!--\s*STATE:(S[1-7])\s*-->/);
+  const match = response.match(/<!--\s*STATE:(S[1-8])\s*-->/);
   return match ? (match[1] as OnboardingState) : null;
 }
 
@@ -160,8 +162,9 @@ STATE GUIDELINES:
 - S3 (Demo): Demonstrate VaultFill's capability by giving real, useful answers. Show how VaultFill helps with their specific needs.
 - S4 (Value): Reinforce value — time savings, coverage, accuracy. Do NOT pitch or ask for contact info yet.
 - S5 (Objection Handling): User raised a concern or asked about pricing. Address it directly and honestly. For pricing: "VaultFill offers lean startup pricing — we'll have specific plans available soon. Want to join the early access list?" Then transition toward S6.
-- S6 (Soft CTA): Offer a gentle next step. Do NOT collect PII yet. Append <!-- STATE:S6 --> when offering.
+- S6 (Soft CTA): Offer a gentle next step — "Want to unlock the full report?". Do NOT collect PII yet. Append <!-- STATE:S6 --> when offering.
 - S7 (Convert): User said yes. NOW you may ask for email/name. Append <!-- STATE:S7 -->.
+- S8 (Payment Gate): Lead captured. Offer the full analysis report behind a payment gate. Say: "Your personalized compliance report is ready — click **Unlock Full Report** below to access it." Append <!-- STATE:S8 -->. The UI will render the checkout button.
 
 CRITICAL RULES:
 - NEVER ask the same clarifying question twice. If the user already answered, move forward.
