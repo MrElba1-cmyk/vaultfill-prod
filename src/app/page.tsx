@@ -1,6 +1,7 @@
 import TrustBadges from '../components/TrustBadges';
 import SandboxBanner from '../components/SandboxBanner';
 import SocialProof from '../components/SocialProof';
+import LiveAuditFeed from '../components/LiveAuditFeed';
 
 export default function Page() {
   return (
@@ -22,6 +23,9 @@ export default function Page() {
 
         {/* Trust Badges */}
         <TrustBadges />
+
+        {/* Live Audit Feed — AI control mapping animation */}
+        <LiveAuditFeed />
 
         {/* Privacy Promise */}
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-5">
