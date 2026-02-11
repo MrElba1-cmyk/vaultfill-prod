@@ -24,8 +24,12 @@ function hasKey(v?: string) {
 
 /** Primary model for /api/chat */
 export const chatModel = (() => {
+  // Priority: Google (user has Google AI Pro; large context)
+  if (hasKey(process.env.GOOGLE_API_KEY)) {
+    return googleProvider('gemini-1.5-pro');
+  }
+  // Secondary: Anthropic (if available)
   if (hasKey(process.env.ANTHROPIC_API_KEY)) {
-    // Claude Sonnet (quality)
     return anthropicProvider('claude-3-5-sonnet-latest');
   }
   // Fail-safe fallback
