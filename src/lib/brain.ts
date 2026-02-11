@@ -149,7 +149,7 @@ const CLASS_A_RULES: { subtype: IntentSubtype; pattern: RegExp; confidence: numb
   {
     subtype: 'signup_pricing',
     pattern:
-      /\b(sign\s*up|signup|get\s+started|early\s+access|book\s+(a\s+)?demo|schedule\s+(a\s+)?demo|talk\s+to\s+sales|contact\s+(sales|team|us)|pricing|buy|purchase|subscribe|free\s+trial|start\s+(a\s+)?trial|join|register|onboard|want\s+to\s+(try|use|start)|how\s+much|what('?s|\s+does\s+it)\s+cost)\b/i,
+      /\b(sign\s*up|signup|get\s+started|early\s+access|unlock\s+(full\s+)?report|talk\s+to\s+sales|contact\s+(sales|team|us)|pricing|buy|purchase|subscribe|free\s+trial|start\s+(a\s+)?trial|join|register|onboard|want\s+to\s+(try|use|start)|how\s+much|what('?s|\s+does\s+it)\s+cost)\b/i,
     confidence: 0.9,
   },
   // Email capture signals (user proactively offering info)
@@ -360,8 +360,12 @@ export function getStaticResponse(subtype: IntentSubtype): StaticResponse | null
     case 'signup_pricing':
       return {
         text:
-          "Great — let’s get you set up.\n\n" +
-          "To get started, please type your **email address**.",
+          "VaultFill starts at **$999/mo** (Core).\n\n" +
+          "Plans:\n" +
+          "- **Core** — $999/mo (SOC 2, <20 seats)\n" +
+          "- **Growth** — $2,499/mo (SOC 2 + ISO 27001, unlimited seats)\n" +
+          "- **Scale** — Custom (contact sales)\n\n" +
+          "Want me to unlock the full report? Drop your **email address** to get started.",
         useLLM: false,
       };
 
@@ -478,7 +482,7 @@ export function buildDataAckResponse(data: ExtractedData, expectedFields: string
     response += `\n\nCould you also share your **${missing.join(' and ')}**?`;
   } else {
     response +=
-      '\n\n✅ You\'re all set! The VaultFill team will reach out shortly. ' +
+      '\n\n✅ You\'re all set! Click **Unlock Full Report** below to access your personalized compliance analysis. ' +
       'In the meantime, feel free to keep asking me security and compliance questions — I\'m here to help! 🛡️';
   }
 
