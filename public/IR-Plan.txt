@@ -1,0 +1,12 @@
+VaultFill — Incident Response Plan (Synthetic)
+Version 1.0 • Classification: Confidential • Date: 2026-02-11
+
+Section 1 — Incident Response Objectives
+RTO: 12 hours (critical production services) following Severity 1 incidents.
+
+Section 2 — Notification Timelines
+Breach Notification: 5 days (regulatory/customer, where applicable, from confirmation).
+Internal escalation: notify Security and Engineering On-Call within 1 hour of suspected breach identification.
+
+Section 3 — Evidence Preservation and Logging
+Audit Log Retention: 90 days minimum for baseline operations; preserve incident-specific logs for 1 year in the case file.

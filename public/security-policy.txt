@@ -1,0 +1,13 @@
+VaultFill — Security Policy (Synthetic)
+Version 1.0 • Classification: Confidential • Date: 2026-02-11
+
+Section 1 — Availability and Recovery Objectives
+RTO: 4 hours (Tier-1 services).
+RPO: 1 hour (Tier-1 services).
+
+Section 2 — Incident Reporting and Breach Notification
+Breach Notification: 72 hours (regulatory/customer, where applicable, from confirmation).
+Internal escalation: notify Security within 2 hours of suspected breach identification.
+
+Section 3 — Audit Logging and Retention
+Audit Log Retention: 365 days minimum for authentication, authorization, admin actions, and data access.

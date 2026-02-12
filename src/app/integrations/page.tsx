@@ -1,3 +1,5 @@
+import AINodeIcon from '@/components/icons/AINodeIcon';
+
 export const metadata = {
   title: 'Integrations — VaultFill',
   description:
@@ -20,7 +22,12 @@ export default function IntegrationsPage() {
     <main className="min-h-screen px-6 py-20" style={{ background: '#0a0a0a' }}>
       <div className="mx-auto max-w-5xl">
         <p className="text-xs tracking-widest text-zinc-400">CONNECTORS</p>
-        <h1 className="mt-3 text-4xl font-semibold text-zinc-50">Integrations</h1>
+        <h1 className="mt-3 flex items-center gap-3 text-4xl font-semibold text-zinc-50">
+          <span className="text-emerald-300">
+            <AINodeIcon variant="link" size={22} glow />
+          </span>
+          Integrations
+        </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-400">
           VaultFill is building AI-native connectors that turn operational signals into audit-ready evidence.
           These connectors are designed to map artifacts to controls automatically (no spreadsheet triage).

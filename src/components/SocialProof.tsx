@@ -8,6 +8,10 @@ const companies = [
   'ClearVault', 'Apex Financial', 'SentryOps', 'TrueNorth Cyber',
 ];
 
+function FadingDivider() {
+  return <div className="my-10 fading-line" aria-hidden="true" />;
+}
+
 interface Stat {
   numericValue: number;
   decimals: number;
@@ -76,7 +80,10 @@ function StatsGrid() {
   const inView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <div ref={ref} className="grid grid-cols-2 gap-4 text-center mb-14 sm:grid-cols-4">
+    <div
+      ref={ref}
+      className="grid grid-cols-2 gap-4 text-center mb-14 md:grid-cols-4"
+    >
       {stats.map((s) => (
         <motion.div
           key={s.label}
@@ -84,12 +91,21 @@ function StatsGrid() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="group relative rounded-xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-200 hover:border-emerald-500/25 hover:shadow-[0_0_30px_var(--glow-emerald)]"
+          className="group relative overflow-hidden rounded-2xl p-[1px]"
         >
-          <div className="text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-br from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
-            <AnimatedCounter stat={s} inView={inView} />
+          {/* 1px gradient border */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/35 to-transparent opacity-70" />
+
+          {/* card */}
+          <div className="relative rounded-2xl border border-white/5 bg-[var(--card-2)] p-5 backdrop-blur-sm transition-all duration-200 hover:shadow-[0_0_40px_rgba(52,211,153,0.10)]">
+            {/* inner glow */}
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(70%_60%_at_50%_0%,rgba(16,185,129,0.10)_0%,transparent_60%)]" />
+
+            <div className="relative text-3xl font-bold tracking-tight md:text-4xl bg-gradient-to-br from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
+              <AnimatedCounter stat={s} inView={inView} />
+            </div>
+            <div className="relative mt-2 text-xs text-[var(--muted-2)] sm:text-sm">{s.label}</div>
           </div>
-          <div className="mt-2 text-xs text-[var(--muted-2)] sm:text-sm">{s.label}</div>
         </motion.div>
       ))}
     </div>
@@ -107,6 +123,7 @@ export default function SocialProof() {
     >
       {/* Stats */}
       <StatsGrid />
+      <FadingDivider />
 
       {/* Company ticker */}
       <div className="mb-14">
@@ -117,15 +134,23 @@ export default function SocialProof() {
           {/* Fade edges */}
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[var(--card-2)] to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--card-2)] to-transparent" />
-          <div className="flex animate-[scroll_30s_linear_infinite] gap-12 whitespace-nowrap">
+
+          {/* Infinite marquee: grayscale/low-opacity baseline; hover-to-color */}
+          <div className="group flex animate-[scroll_32s_linear_infinite] gap-12 whitespace-nowrap will-change-transform marquee-container">
             {[...companies, ...companies].map((c, i) => (
-              <span key={`${c}-${i}`} className="text-sm font-semibold tracking-wide text-[var(--muted)] opacity-60">
+              <span
+                key={`${c}-${i}`}
+                className="select-none text-sm font-semibold tracking-wide text-zinc-300/40 transition-all duration-200 hover:text-emerald-200 hover:opacity-100 dark:text-zinc-300/40 light:text-slate-500/60"
+                style={{ filter: 'grayscale(100%)' }}
+              >
                 {c}
               </span>
             ))}
           </div>
         </div>
       </div>
+
+      <FadingDivider />
 
       {/* Testimonials */}
       <div className="grid gap-5 md:grid-cols-3">

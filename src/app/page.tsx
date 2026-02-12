@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { motion } from "framer-motion";
 
 import ThemeToggle from "@/components/ThemeToggle";
@@ -15,6 +16,7 @@ import PrivacyPromise from "@/components/PrivacyPromise";
 import SocialProof from "@/components/SocialProof";
 import TryItCTA from "@/components/TryItCTA";
 import FloatingChat from "@/components/FloatingChat";
+import LiveAuditFeed from "@/components/LiveAuditFeed";
 import { useModal } from "@/contexts/ModalContext";
 
 const complianceBadges = ["SOC 2 Type II", "ISO 27001", "GDPR", "AES-256"];
@@ -144,33 +146,42 @@ export default function Home() {
       {/* Navigation */}
       <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-[14px]">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-80">
             <ApexLogo />
             <div className="leading-tight">
               <div className="text-[13px] font-semibold tracking-wide text-[var(--fg)] sm:text-sm">VaultFill</div>
               <div className="hidden text-[11px] text-[var(--muted-2)] sm:block">Security Questionnaire Automation</div>
             </div>
-          </div>
+          </Link>
 
           <nav className="hidden items-center gap-8 text-sm text-[var(--muted-2)] md:flex">
-            <a className="transition-colors hover:text-[var(--fg)]" href="#features">Features</a>
-            <a className="transition-colors hover:text-[var(--fg)]" href="#how-it-works">Workflow</a>
-            <a className="transition-colors hover:text-[var(--fg)]" href="#faq">FAQ</a>
+            <Link className="transition-colors hover:text-[var(--fg)]" href="/about">About</Link>
+            <Link className="transition-colors hover:text-[var(--fg)]" href="/security">Security</Link>
+            <Link className="transition-colors hover:text-[var(--fg)]" href="/contact">Contact</Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
-            <Link
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                openLeadModal();
-              }}
-              className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(0,212,255,0.20)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
-            >
-              <span className="relative">Get Early Access</span>
-              <span className="vault-power" aria-hidden="true" />
-            </Link>
+
+            <SignedOut>
+              <Link
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLeadModal();
+                }}
+                className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(0,212,255,0.20)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
+              >
+                <span className="relative">Get Early Access</span>
+                <span className="vault-power" aria-hidden="true" />
+              </Link>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="rounded-xl border border-white/10 bg-zinc-950/60 px-2 py-1 backdrop-blur-xl">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
           </div>
         </div>
       </header>
@@ -322,6 +333,14 @@ export default function Home() {
         {/* 3 · SECURITY TRUST CARDS */}
         <div className="pb-14">
           <TrustBadges />
+        </div>
+
+        {/* 3.5 · LIVE AUDIT FEED */}
+        <div className="py-14 sm:py-20">
+          <Reveal>
+            <div className="bento-kicker text-[var(--apex-emerald)] mb-4">AUTONOMOUS AUDIT FEED</div>
+            <LiveAuditFeed />
+          </Reveal>
         </div>
 
         {/* 4 · LIVE QUESTIONNAIRE DEMO */}
@@ -483,7 +502,7 @@ export default function Home() {
         {/* 12 · FOOTER */}
         <footer className="border-t border-[var(--border)] pb-14 pt-10">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-            <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
               <ApexLogo size={38} />
               <div>
                 <div className="text-sm font-semibold text-[var(--fg)]">VaultFill</div>
@@ -493,11 +512,13 @@ export default function Home() {
                   Houston-born
                 </div>
               </div>
-            </div>
+            </Link>
             <div className="flex flex-wrap items-center gap-6 text-xs text-[var(--muted-2)]">
-              <a href="/privacy" className="transition-colors hover:text-[var(--fg)]">Privacy</a>
-              <a href="/terms" className="transition-colors hover:text-[var(--fg)]">Terms</a>
-              <a href="/security" className="transition-colors hover:text-[var(--fg)]">Security</a>
+              <Link href="/about" className="transition-colors hover:text-[var(--fg)]">About</Link>
+              <Link href="/contact" className="transition-colors hover:text-[var(--fg)]">Contact</Link>
+              <Link href="/privacy" className="transition-colors hover:text-[var(--fg)]">Privacy</Link>
+              <Link href="/terms" className="transition-colors hover:text-[var(--fg)]">Terms</Link>
+              <Link href="/security" className="transition-colors hover:text-[var(--fg)]">Security</Link>
               <span>© {new Date().getFullYear()} VaultFill. All rights reserved.</span>
             </div>
           </div>

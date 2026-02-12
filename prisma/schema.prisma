@@ -6,6 +6,7 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
   extensions = [vector]
 }
 
@@ -35,4 +36,14 @@ model Lead {
   status         String?  @default("new")
 
   @@map("leads")
+}
+
+model AuditRecord {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String
+  score     Int
+  findings  Json     @db.JsonB
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

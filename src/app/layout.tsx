@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ModalProvider } from "@/contexts/ModalContext";
 import FloatingChat from "@/components/FloatingChat";
@@ -71,15 +73,37 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>
-          <ModalProvider>
-            {children}
-            <FloatingChat />
-          </ModalProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: '#10b981',
+          colorText: '#d1fae5',
+          colorBackground: '#09090b',
+        },
+        elements: {
+          card: 'bg-zinc-950/80 border border-white/10 backdrop-blur-xl',
+          headerTitle: 'text-emerald-400',
+          headerSubtitle: 'text-zinc-400',
+          socialButtonsBlockButton: 'bg-zinc-900/60 border border-white/10 text-emerald-200 hover:bg-zinc-900',
+          formButtonPrimary:
+            'bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.25)]',
+          formFieldInput:
+            'bg-zinc-950 border border-white/10 text-emerald-100 placeholder:text-zinc-600 focus:ring-2 focus:ring-emerald-500/30',
+          footerActionLink: 'text-emerald-400 hover:text-emerald-300',
+        },
+      }}
+    >
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <ThemeProvider>
+            <ModalProvider>
+              {children}
+              <FloatingChat />
+            </ModalProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

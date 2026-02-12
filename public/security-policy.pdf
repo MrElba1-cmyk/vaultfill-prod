@@ -1,0 +1,323 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 612. 792.]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 1375
+>>
+stream
+0.200025 w
+0 G
+BT
+/F2 18 Tf
+20.6999999999999993 TL
+0 g
+56. 720. Td
+(VaultFill — Security Policy \(Synthetic\)) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0 g
+56. 698. Td
+(Version 1.0 • Classification: Confidential • Date: 2026-02-11) Tj
+ET
+0.2 0.83 0.6 RG
+1. w
+56. 680. m
+556. 680. l
+S
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 662. Td
+(Section 1 — Availability and Recovery Objectives) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 642. Td
+(RTO: 4 hours \(Tier-1 services\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 622. Td
+(RPO: 1 hour \(Tier-1 services\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 602. Td
+() Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 582. Td
+(Section 2 — Incident Reporting and Breach Notification) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 562. Td
+(Breach Notification: 72 hours \(regulatory/customer, where applicable, from confirmation\).) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 542. Td
+(Internal escalation: notify Security within 2 hours of suspected breach identification.) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 522. Td
+() Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 502. Td
+(Section 3 — Audit Logging and Retention) Tj
+ET
+BT
+/F1 11 Tf
+12.6499999999999986 TL
+0 g
+56. 482. Td
+(Audit Log Retention: 365 days minimum for authentication, authorization, admin actions, and data) Tj
+T* (access.) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R ]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+19 0 obj
+<<
+/Producer (jsPDF 4.1.0)
+/CreationDate (D:20260211170400-06'00')
+>>
+endobj
+20 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000001547 00000 n 
+0000003364 00000 n 
+0000000015 00000 n 
+0000000120 00000 n 
+0000001604 00000 n 
+0000001729 00000 n 
+0000001859 00000 n 
+0000001992 00000 n 
+0000002129 00000 n 
+0000002252 00000 n 
+0000002381 00000 n 
+0000002513 00000 n 
+0000002649 00000 n 
+0000002777 00000 n 
+0000002904 00000 n 
+0000003033 00000 n 
+0000003166 00000 n 
+0000003268 00000 n 
+0000003612 00000 n 
+0000003698 00000 n 
+trailer
+<<
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <125A5A7318C1EE059E133F2BCA232D16> <125A5A7318C1EE059E133F2BCA232D16> ]
+>>
+startxref
+3802
+%%EOF

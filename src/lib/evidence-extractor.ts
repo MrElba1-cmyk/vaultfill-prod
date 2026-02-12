@@ -39,34 +39,66 @@ export function getFileType(filename: string): "pdf" | "image" | "markdown" | "u
 }
 
 /**
- * Extract text from a PDF buffer using pdf-parse
+ * Extract text from a PDF buffer.
+ * Primary: pdf-parse (if it works in the current runtime)
+ * Fallback: lightweight binary text extraction for non-compressed jsPDF PDFs.
  */
 export async function extractPdfText(buffer: Buffer, filename: string): Promise<ExtractionResult> {
+  // Fallback first for our synthetic/demo PDFs to avoid pdfjs worker issues.
+  // This keeps /api/analysis/deep stable even when pdf-parse breaks in dev/serverless.
   try {
-    // Dynamic import to avoid bundling issues in edge runtime
-    const pdfModule = await import("pdf-parse");
-    const pdfParse = (pdfModule as any).default || (pdfModule as any).PDFParse || pdfModule;
-    const parseFn = typeof pdfParse === "function" ? pdfParse : pdfParse.PDFParse || pdfParse;
-    const data = await parseFn(buffer);
-    
-    if (!data.text || data.text.trim().length === 0) {
+    const { extractPdfTextFallback } = await import('@/lib/pdf-text-fallback');
+    const quick = extractPdfTextFallback(buffer);
+    if (quick && /\bRTO\b|Breach Notification|Audit Log Retention/i.test(quick)) {
+      return { text: quick, sourceType: 'pdf' };
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    // Some pdfjs builds reference DOMMatrix even when we disable page rendering.
+    if (!(globalThis as any).DOMMatrix) {
+      (globalThis as any).DOMMatrix = class DOMMatrix {};
+    }
+
+    const pdfParseMod = require('pdf-parse');
+    const PDFParse = (pdfParseMod?.PDFParse || pdfParseMod?.default?.PDFParse) as any;
+    if (!PDFParse) throw new Error('pdf-parse: PDFParse class not found');
+
+    const parser = new PDFParse({ verbosity: 0 });
+    await parser.load(buffer);
+    const text = (await parser.getText()) || '';
+    const info = await parser.getInfo().catch(() => null);
+    const pageCount = info?.numpages || info?.pages || undefined;
+
+    if (!text || text.trim().length === 0) {
       return {
-        text: "",
-        sourceType: "pdf",
-        pageCount: data.numpages,
-        error: "PDF contains no extractable text (may be image-only). Consider converting to image and re-uploading.",
+        text: '',
+        sourceType: 'pdf',
+        pageCount,
+        error: 'PDF contains no extractable text (may be image-only). Consider converting to image and re-uploading.',
       };
     }
 
     return {
-      text: data.text.trim(),
-      sourceType: "pdf",
-      pageCount: data.numpages,
+      text: text.trim(),
+      sourceType: 'pdf',
+      pageCount,
     };
   } catch (err: any) {
+    // Last resort fallback (best effort)
+    try {
+      const { extractPdfTextFallback } = await import('@/lib/pdf-text-fallback');
+      const quick = extractPdfTextFallback(buffer);
+      if (quick) return { text: quick, sourceType: 'pdf', error: `Primary PDF extraction failed: ${err.message}` };
+    } catch {
+      // ignore
+    }
+
     return {
-      text: "",
-      sourceType: "pdf",
+      text: '',
+      sourceType: 'pdf',
       error: `PDF extraction failed: ${err.message}`,
     };
   }
@@ -74,7 +106,6 @@ export async function extractPdfText(buffer: Buffer, filename: string): Promise<
 
 /**
  * Extract text from an image using OpenAI Vision API (GPT-4o)
- * This replaces heavy OCR deps like tesseract.js — perfect for serverless
  */
 export async function extractImageText(
   buffer: Buffer,
@@ -107,9 +138,7 @@ export async function extractImageText(
           {
             role: "system",
             content:
-              "You are an OCR specialist. Extract ALL visible text from this compliance/security evidence screenshot. " +
-              "Preserve structure (tables, lists, headers). If it's a dashboard or UI, describe the key data points. " +
-              "Output clean, structured text. Do not add commentary — only extracted content.",
+              "You are an OCR specialist. Extract ALL visible text from this compliance/security evidence screenshot.",
           },
           {
             role: "user",
@@ -203,7 +232,6 @@ export function chunkEvidence(
   function flush() {
     const trimmed = currentContent.trim();
     if (trimmed.length > 30) {
-      // Split into chunks if too large
       for (let i = 0; i < trimmed.length; i += chunkSize) {
         chunks.push({
           id: `evidence-${filename}-${idx++}`,
@@ -218,7 +246,6 @@ export function chunkEvidence(
   }
 
   for (const line of lines) {
-    // Detect headers for better chunking
     if (/^#{1,3}\s/.test(line) || /^[A-Z][A-Z\s]{5,}$/.test(line.trim())) {
       flush();
       currentTitle = line.replace(/^#+\s+/, "").trim() || cleanName;

@@ -1,27 +1,25 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "VaultFill terms of service.",
-};
+import LegalLayout from '@/components/LegalLayout';
 
 export default function TermsPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg)] px-6 text-center">
-      <div className="mx-auto max-w-md space-y-4">
-        <div className="text-4xl">📋</div>
-        <h1 className="text-2xl font-bold text-[var(--fg)]">Terms of Service</h1>
-        <p className="text-sm text-[var(--muted)]">
-          Our full terms of service are coming soon. We&apos;re committed to
-          transparent, fair terms for all customers.
-        </p>
-        <a
-          href="/"
-          className="inline-block text-sm text-[var(--apex-emerald)] underline underline-offset-4 transition-colors hover:text-[var(--fg)]"
-        >
-          ← Back to home
-        </a>
-      </div>
-    </main>
+    <LegalLayout 
+      title="Terms of Service" 
+      subtitle="Last Updated: February 11, 2026"
+    >
+      <section>
+        <h2 className="text-white font-bold text-lg mb-4 uppercase tracking-tight">1. Services Provided</h2>
+        <p>VaultFill provides an autonomous compliance and security questionnaire automation platform. Usage is governed by the seat count and deployment model selected during onboarding.</p>
+      </section>
+
+      <section>
+        <h2 className="text-white font-bold text-lg mb-4 uppercase tracking-tight">2. Acceptable Use</h2>
+        <p>Users must not use the Emerald Stealth engine for reverse-engineering, data-scraping, or any activity that violates the security of our infrastructure or other tenants.</p>
+      </section>
+
+      <section>
+        <h2 className="text-white font-bold text-lg mb-4 uppercase tracking-tight">3. Intellectual Property</h2>
+        <p>Your evidence, policies, and generated responses remain your sole property. VaultFill retains ownership of the underlying AI models and proprietary "Emerald Stealth" remediation logic.</p>
+      </section>
+    </LegalLayout>
   );
 }

@@ -36,64 +36,69 @@ async function getEmbeddings(texts: string[]): Promise<number[][]> {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const files = (formData.getAll("file") as File[]).filter(Boolean);
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return NextResponse.json(
-        { error: "No file provided. Send a file via multipart form data." },
+        { error: "No file(s) provided. Send one or more files via multipart form data (field name: file)." },
         { status: 400 }
       );
     }
 
-    const filename = file.name;
-    const fileType = getFileType(filename);
-
-    if (fileType === "unsupported") {
-      return NextResponse.json(
-        {
-          error: `Unsupported file type: ${filename}`,
-          supported: getSupportedExtensions(),
-        },
-        { status: 400 }
-      );
+    // Size check: 10MB max per file
+    for (const f of files) {
+      if (f.size > 10 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: `File too large: ${f.name}. Maximum size is 10MB per file.` },
+          { status: 400 }
+        );
+      }
+      const ft = getFileType(f.name);
+      if (ft === "unsupported") {
+        return NextResponse.json(
+          {
+            error: `Unsupported file type: ${f.name}`,
+            supported: getSupportedExtensions(),
+          },
+          { status: 400 }
+        );
+      }
     }
 
-    // Size check: 10MB max
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 10MB." },
-        { status: 400 }
-      );
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Extract text
-    const extraction = await extractEvidence(buffer, filename, file.type);
-
-    if (extraction.error && !extraction.text) {
-      return NextResponse.json(
-        {
-          error: extraction.error,
-          sourceType: extraction.sourceType,
-        },
-        { status: 422 }
-      );
-    }
-
-    // Chunk the extracted text
-    const chunks = chunkEvidence(filename, extraction.text, extraction.sourceType);
-
-    if (chunks.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No meaningful content could be extracted from this file.",
-          sourceType: extraction.sourceType,
+    // Extract + chunk per file (in parallel)
+    const extracted = await Promise.all(
+      files.map(async (file) => {
+        const filename = file.name;
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const extraction = await extractEvidence(buffer, filename, file.type);
+        if (extraction.error && !extraction.text) {
+          return { filename, ok: false, error: extraction.error, sourceType: extraction.sourceType, chunks: [] as any[], text: "" };
+        }
+        const chunks = chunkEvidence(filename, extraction.text, extraction.sourceType);
+        return {
+          filename,
+          ok: chunks.length > 0,
           warning: extraction.error,
-        },
+          sourceType: extraction.sourceType,
+          pageCount: extraction.pageCount,
+          chunks,
+          text: extraction.text || "",
+        };
+      })
+    );
+
+    const okFiles = extracted.filter((x) => x.ok);
+    if (okFiles.length === 0) {
+      // Return first error (or generic)
+      const first = extracted[0];
+      return NextResponse.json(
+        { error: first?.error || "No meaningful content could be extracted from the uploaded files." },
         { status: 422 }
       );
     }
+
+    // Merge chunks
+    const chunks = okFiles.flatMap((x) => x.chunks);
 
     // Generate embeddings
     const texts = chunks.map((c) => `${c.title}\n${c.content}`);
@@ -120,9 +125,10 @@ export async function POST(req: Request) {
       // No existing index, start fresh
     }
 
-    // Remove any previous entries from the same file
+    // Remove any previous entries from the same uploaded files
+    const fileNames = okFiles.map((f) => f.filename);
     existingIndex = existingIndex.filter(
-      (entry: any) => entry.filename !== filename
+      (entry: any) => !fileNames.includes(entry.filename)
     );
 
     // Add new entries
@@ -145,15 +151,38 @@ export async function POST(req: Request) {
 
     fs.writeFileSync(indexPath, JSON.stringify(existingIndex, null, 2));
 
+    // --- Compliance Score (heuristic, demo-only) ---
+    const mergedText = okFiles.map((f) => `[[${f.filename}]]\n${f.text}`).join('\n\n');
+    const lower = mergedText.toLowerCase();
+    const signals: Array<{ key: string; label: string; weight: number; hit: boolean }> = [
+      { key: 'mfa', label: 'MFA / strong auth', weight: 12, hit: /\bmfa\b|multi-factor|2fa/.test(lower) },
+      { key: 'rbac', label: 'RBAC / least privilege', weight: 10, hit: /rbac|least privilege|role-based/.test(lower) },
+      { key: 'encrypt_rest', label: 'AES-256 at rest', weight: 14, hit: /aes-256|aes256|encryption at rest/.test(lower) },
+      { key: 'encrypt_transit', label: 'TLS in transit', weight: 10, hit: /tls\s*1\.3|tls|encryption in transit/.test(lower) },
+      { key: 'logging', label: 'Logging/monitoring', weight: 10, hit: /logging|monitoring|alerting|siem/.test(lower) },
+      { key: 'ir', label: 'Incident response', weight: 12, hit: /incident response|tabletop|containment/.test(lower) },
+      { key: 'backup', label: 'Backups/DR', weight: 8, hit: /backup|disaster recovery|bcp|continuity/.test(lower) },
+      { key: 'vendor', label: 'Vendor management', weight: 8, hit: /vendor|third party|subprocessor/.test(lower) },
+      { key: 'retention', label: 'Retention/minimization', weight: 8, hit: /retention|minimization|purpose limitation/.test(lower) },
+      { key: 'audit', label: 'Auditability', weight: 8, hit: /audit trail|auditability|evidence/.test(lower) },
+    ];
+
+    const base = 40;
+    const earned = signals.filter((s) => s.hit).reduce((sum, s) => sum + s.weight, 0);
+    const score = Math.min(100, base + earned);
+
+    const missing = signals.filter((s) => !s.hit).slice(0, 4).map((s) => s.label);
+    const highlights = signals.filter((s) => s.hit).slice(0, 5).map((s) => s.label);
+
     return NextResponse.json({
       ok: true,
-      filename,
-      sourceType: extraction.sourceType,
-      pageCount: extraction.pageCount,
+      files: okFiles.map((f) => ({ filename: f.filename, sourceType: f.sourceType, pageCount: f.pageCount, warning: f.warning })),
       chunksCreated: chunks.length,
       embeddingsGenerated: embeddings.length,
-      warning: extraction.error, // partial errors (e.g., low confidence OCR)
-      message: `Successfully ingested ${filename}: ${chunks.length} chunks indexed.`,
+      complianceScore: score,
+      highlights,
+      gaps: missing,
+      message: `Successfully ingested ${okFiles.length} file(s): ${chunks.length} chunks indexed.`,
     });
   } catch (error: any) {
     console.error("Evidence upload error:", error);
