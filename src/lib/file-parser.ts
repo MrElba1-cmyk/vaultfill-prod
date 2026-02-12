@@ -1,3 +1,8 @@
+// Stub DOMMatrix for pdf-parse in Node environments
+if (typeof global !== 'undefined' && !(global as any).DOMMatrix) {
+  (global as any).DOMMatrix = class {};
+}
+
 const pdf = require('pdf-parse');
 import mammoth from 'mammoth';
 
