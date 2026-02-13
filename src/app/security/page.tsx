@@ -25,7 +25,7 @@ export default function SecurityPage() {
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-[var(--fg)] font-bold text-xl tracking-tight">1. Emerald Stealth Architecture</h2>
+        <h2 className="text-[var(--fg)] font-bold text-xl tracking-tight">1. <span className="text-[var(--apex-emerald)]">Emerald Stealth</span> Architecture</h2>
         <p>Our infrastructure utilizes <strong>Emerald Stealth</strong>—a proprietary isolation layer that sanitizes all incoming artifacts before they enter the processing pipeline. This prevents prompt injection and data leakage.</p>
         <p>This layer acts as a "digital air-gap" for your evidence, ensuring that the AI processing engine never interacts with raw, un-sanitized files.</p>
       </section>
@@ -40,15 +40,15 @@ export default function SecurityPage() {
         <p>VaultFill supports multi-region deployment. Enterprise customers can choose to pin their data to specific AWS/GCP regions (e.g., us-east-1, eu-central-1) to comply with local data sovereignty laws.</p>
       </section>
 
-      <div className="bg-emerald-500/5 border border-emerald-500/20 p-8 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
+      <div className="bg-emerald-500/5 dark:bg-emerald-500/5 light:bg-[var(--apex-emerald)]/5 border border-[var(--apex-emerald)]/20 p-8 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
         <div className="flex-1">
-          <h3 className="text-emerald-500 font-bold text-sm uppercase tracking-widest mb-2">Active Monitoring</h3>
+          <h3 className="text-[var(--apex-emerald)] font-bold text-sm uppercase tracking-widest mb-2">Active Monitoring</h3>
           <p className="text-sm text-[var(--muted)] leading-relaxed">
             VaultFill maintains a 24/7 autonomous monitoring feed. Any anomaly in the "Emerald Stealth" layer triggers immediate circuit-breaking to protect tenant data integrity.
           </p>
         </div>
-        <div className="h-24 w-24 bg-emerald-500/10 rounded-full flex items-center justify-center shrink-0 border border-emerald-500/20">
-          <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse" />
+        <div className="h-24 w-24 bg-[var(--apex-emerald)]/10 rounded-full flex items-center justify-center shrink-0 border border-[var(--apex-emerald)]/20">
+          <div className="h-3 w-3 bg-[var(--apex-emerald)] rounded-full animate-pulse" />
         </div>
       </div>
     </LegalLayout>

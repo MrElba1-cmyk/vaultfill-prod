@@ -134,200 +134,198 @@ export default function Home() {
   const { isLeadModalOpen, openLeadModal, closeLeadModal } = useModal();
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+    <div className="min-h-screen mesh-emerald text-[var(--fg)] selection:bg-emerald-500/30">
       {/* Clean, stable background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(70%_40%_at_50%_0%,rgba(0,212,255,0.10)_0%,transparent_62%)] opacity-80" />
-        <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(148,163,184,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.18)_1px,transparent_1px)] [background-size:92px_92px] dark:[background-image:linear-gradient(to_right,rgba(226,232,240,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(226,232,240,0.06)_1px,transparent_1px)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(70%_40%_at_50%_0%,rgba(52,211,153,0.08)_0%,transparent_62%)] opacity-80" />
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,rgba(148,163,184,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.18)_1px,transparent_1px)] [background-size:64px_64px]" />
       </div>
 
       <LeadModal open={isLeadModalOpen} onClose={closeLeadModal} />
 
       {/* Navigation */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--card)] backdrop-blur-[14px]">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-80">
-            <ApexLogo />
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#03060B]/20 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <ApexLogo size={36} />
             <div className="leading-tight">
-              <div className="text-[13px] font-semibold tracking-wide text-[var(--fg)] sm:text-sm">VaultFill</div>
-              <div className="hidden text-[11px] text-[var(--muted-2)] sm:block">Security Questionnaire Automation</div>
+              <div className="text-lg font-bold tracking-tight text-[var(--fg)]">VaultFill</div>
+              <div className="hidden text-[10px] font-medium uppercase tracking-widest text-emerald-500/60 sm:block">Apex Compliance</div>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm text-[var(--muted-2)] md:flex">
-            <Link className="transition-colors hover:text-[var(--fg)]" href="/about">About</Link>
-            <Link className="transition-colors hover:text-[var(--fg)]" href="/security">Security</Link>
-            <Link className="transition-colors hover:text-[var(--fg)]" href="/contact">Contact</Link>
+          <nav className="hidden items-center gap-10 text-[13px] font-medium tracking-wide text-[var(--muted-2)] md:flex">
+            <Link className="transition-colors hover:text-emerald-400" href="/about">Platform</Link>
+            <Link className="transition-colors hover:text-emerald-400" href="/security">Security</Link>
+            <Link className="transition-colors hover:text-emerald-400" href="/pricing">Pricing</Link>
+            <Link className="transition-colors hover:text-emerald-400" href="/internal/roadmap">Roadmap</Link>
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-4">
             <ThemeToggle />
 
             <SignedOut>
-              <Link
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  openLeadModal();
-                }}
-                className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_18px_60px_rgba(0,212,255,0.20)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110 sm:px-5 sm:py-2.5 sm:text-sm"
+              <button
+                onClick={openLeadModal}
+                className="group relative h-10 overflow-hidden rounded-full bg-emerald-500 px-6 text-sm font-bold text-black transition-all hover:scale-105 active:scale-95"
               >
-                <span className="relative">Get Early Access</span>
-                <span className="vault-power" aria-hidden="true" />
-              </Link>
+                <span className="relative z-10">Get Early Access</span>
+                <div className="absolute inset-0 z-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
             </SignedOut>
 
             <SignedIn>
-              <div className="rounded-xl border border-white/10 bg-zinc-950/60 px-2 py-1 backdrop-blur-xl">
-                <UserButton afterSignOutUrl="/" />
-              </div>
+              <UserButton afterSignOutUrl="/" />
             </SignedIn>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <main className="mx-auto w-full max-w-7xl px-6">
         {/* 1 · SANDBOX BANNER */}
-        <div className="pt-4">
+        <div className="pt-6">
           <SandboxBanner />
         </div>
 
         {/* 2 · HERO */}
         <motion.section
-          className="pb-12 pt-10 sm:pb-16 sm:pt-14 md:pb-20 md:pt-20"
-          variants={section}
+          className="pb-20 pt-16 md:pb-32 md:pt-28"
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: true }}
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.15 }
+            }
+          }}
         >
-          <div className="grid gap-10 sm:gap-14 md:grid-cols-2 md:items-center">
-            <div>
-              <Reveal>
-                <div
-                  className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold"
-                  style={{ color: "var(--vault-blue)" }}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                  Enterprise-grade, evidence-backed automation
-                </div>
-              </Reveal>
+          <div className="text-center">
+            <motion.div
+              variants={reveal}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-emerald-400"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+              </span>
+              Next-Gen Evidence RAG
+            </motion.div>
 
-              <Reveal>
-                <h1 className="mt-6 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[var(--fg)] sm:mt-8 sm:text-4xl md:text-[58px]">
-                  Eliminate Security Questionnaire Pain:
-                  <span className="text-gradient-blue"> Save 400+ hours and cut compliance costs by 85%.</span>
-                </h1>
-              </Reveal>
+            <motion.h1 
+              variants={reveal}
+              className="mx-auto mt-8 max-w-4xl text-5xl font-bold tracking-tight text-[var(--fg)] sm:text-7xl md:text-8xl"
+            >
+              Master Your <br />
+              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-500 bg-clip-text text-transparent">Compliance Vault</span>
+            </motion.h1>
 
-              <Reveal>
-                <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-[var(--muted)] sm:mt-6 sm:text-[15.5px] md:text-lg">
-                  Stop wrestling with security questionnaires. VaultFill’s AI-powered Knowledge Vault transforms your existing evidence (policies, audits, docs) into instant, verifiable answers.
-                  <span className="font-semibold text-[var(--fg)]">Get CISO-grade responses with verifiable citations in minutes, not weeks.</span> Achieve compliance faster, without integration headaches or generic AI.
-                </p>
-              </Reveal>
+            <motion.p 
+              variants={reveal}
+              className="mx-auto mt-10 max-w-2xl text-lg leading-relaxed text-[var(--muted)] md:text-xl"
+            >
+              VaultFill transforms static security artifacts into a live, interactive knowledge engine. 
+              Draft verifiable SOC 2 and SIG responses in seconds, not weeks.
+            </motion.p>
 
-              <Reveal>
-                <div className="mt-7 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
-                  <Link
-                    id="get-started"
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      openLeadModal();
-                    }}
-                    className="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-cyan-500 to-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_22px_70px_rgba(0,212,255,0.25)] ring-1 ring-cyan-400/20 transition-all hover:brightness-110"
-                  >
-                    Start Free Trial
-                    <svg className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
-                    <span className="vault-power" aria-hidden="true" />
-                  </Link>
-
-                  <a
-                    href="#how-it-works"
-                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-2)] px-7 py-3.5 text-sm font-semibold text-[var(--fg)] transition-all hover:bg-[var(--card)]"
-                  >
-                    See the workflow
-                  </a>
-                </div>
-              </Reveal>
-
-              <Reveal>
-                <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-[var(--muted-2)]">
-                  {complianceBadges.map((badge) => (
-                    <div key={badge} className="flex items-center gap-2">
-                      <svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                      </svg>
-                      {badge}
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
-            </div>
-
-            <div>
-              <Reveal>
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-4 shadow-[var(--shadow-natural)] backdrop-blur-[14px] sm:rounded-3xl sm:p-8">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-semibold text-[var(--fg)]">Security Questionnaire — Draft</div>
-                    <div className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold" style={{ color: "var(--vault-blue)" }}>
-                      AI Drafting
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-3">
-                    {[
-                      {
-                        q: "Do you encrypt data at rest?",
-                        a: "Yes — AES-256 is applied to all stored data. Keys are managed via a dedicated KMS.",
-                        cite: "security-policy.pdf § 3.2",
-                      },
-                      {
-                        q: "How do you manage vendor risk?",
-                        a: "Vendors are assessed pre-engagement with scorecards and reviewed quarterly.",
-                        cite: "vendor-mgmt-procedure.pdf",
-                      },
-                      {
-                        q: "Describe your incident response process.",
-                        a: "Our IR plan defines roles, escalation timelines, and mandatory post-incident reviews.",
-                        cite: "IR-Plan.pdf § Appendix A",
-                      },
-                    ].map((item) => (
-                      <div key={item.q} className="rounded-xl border border-[var(--border)] bg-[var(--bg)]/40 p-3 sm:rounded-2xl sm:p-4">
-                        <div className="text-[11px] font-semibold text-[var(--muted-2)]">{item.q}</div>
-                        <div className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{item.a}</div>
-                        <div className="mt-2.5 flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold" style={{ color: "var(--vault-blue)" }}>
-                            {item.cite}
-                          </span>
-                          <span className="rounded-md border border-[var(--border)] bg-[var(--card-2)] px-2 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-                            ✓ Reviewed
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-3 rounded-xl border border-[var(--border)] bg-cyan-500/5 p-3 sm:mt-4 sm:rounded-2xl sm:p-4">
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <div className="text-[11px] font-semibold text-[var(--muted-2)]">Draft completed in</div>
-                        <div className="mt-1 text-2xl font-semibold text-[var(--fg)]">8 minutes</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[11px] font-semibold text-[var(--muted-2)]">Questions answered</div>
-                        <div className="mt-1 text-2xl font-semibold" style={{ color: "var(--vault-blue)" }}>
-                          47 / 52
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
+            <motion.div 
+              variants={reveal}
+              className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+            >
+              <button
+                onClick={openLeadModal}
+                className="group relative flex h-16 items-center gap-3 rounded-2xl bg-emerald-600 px-12 text-lg font-bold text-white transition-all hover:scale-[1.03] hover:bg-emerald-500 active:scale-[0.98] shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] ring-1 ring-white/20"
+              >
+                Start Your Vault
+                <svg className="h-6 w-6 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+              <a
+                href="#how-it-works"
+                className="flex h-14 items-center rounded-2xl border border-white/10 bg-white/5 px-10 text-base font-semibold text-[var(--fg)] backdrop-blur-sm transition-all hover:bg-white/10"
+              >
+                Watch Workflow
+              </a>
+            </motion.div>
           </div>
+
+          <motion.div 
+            variants={reveal}
+            className="relative mx-auto mt-24 max-w-5xl"
+          >
+            <div className="glass-card subpixel-border relative z-10 overflow-hidden">
+              <div className="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-red-500/20 border border-red-500/40" />
+                    <div className="h-3 w-3 rounded-full bg-amber-500/20 border border-amber-500/40" />
+                    <div className="h-3 w-3 rounded-full bg-emerald-500/20 border border-emerald-500/40" />
+                  </div>
+                  <span className="ml-4 text-[11px] font-bold uppercase tracking-widest text-white/40">Security Intelligence Portal</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-2 w-32 rounded-full bg-white/5">
+                    <div className="h-full w-[85%] rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-400">85% Complete</span>
+                </div>
+              </div>
+              <div className="p-8">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <div className="rounded-xl border border-white/5 bg-black/40 p-5">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2">Incoming Question</div>
+                      <div className="text-sm font-medium text-white/90">"Describe your policy for data encryption at rest and in transit."</div>
+                    </div>
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Suggested Draft</div>
+                        <div className="text-[9px] font-bold bg-emerald-400 text-black px-2 py-0.5 rounded">98% Confidence</div>
+                      </div>
+                      <div className="text-sm leading-relaxed text-emerald-100/80">
+                        "VaultFill enforces AES-256 encryption at rest and TLS 1.3 for data in transit. Keys are rotated annually via HSM."
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        <span className="text-[10px] font-bold text-emerald-400/80">Source: Sec-Policy-2025.pdf (Page 12)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-white/5 bg-black/40 p-6">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-6">Real-time Metrics</div>
+                    <div className="space-y-6">
+                      {[
+                        { label: "Questions Drafted", value: "1,284", color: "emerald" },
+                        { label: "Citations Verified", value: "99.8%", color: "cyan" },
+                        { label: "Hours Reclaimed", value: "412h", color: "indigo" },
+                      ].map((stat) => (
+                        <div key={stat.label}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-white/60">{stat.label}</span>
+                            <span className="text-sm font-bold text-white">{stat.value}</span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-white/5">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              whileInView={{ width: "70%" }}
+                              transition={{ duration: 1, delay: 0.5 }}
+                              className={`h-full rounded-full bg-${stat.color}-500`} 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Background Glows for Hero Visual */}
+            <div className="absolute -left-20 -top-20 -z-10 h-64 w-64 bg-emerald-500/20 blur-[120px]" />
+            <div className="absolute -right-20 -bottom-20 -z-10 h-64 w-64 bg-indigo-500/20 blur-[120px]" />
+          </motion.div>
         </motion.section>
 
         {/* 3 · SECURITY TRUST CARDS */}

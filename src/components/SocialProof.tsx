@@ -62,16 +62,19 @@ const testimonials = [
     quote: 'VaultFill cut our questionnaire turnaround from two weeks to under a day. The citations alone saved our reviewers hours.',
     name: 'Sarah Chen',
     role: 'CISO, Meridian Health',
+    avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=150&h=150',
   },
   {
     quote: 'We used to dread DDQs. Now our compliance team actually looks forward to them — the drafts are that good.',
     name: 'James Okafor',
     role: 'Compliance Lead, NovaPay',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150&h=150',
   },
   {
     quote: 'The RAG-powered citations are a game-changer. Every answer maps back to a real source. Auditors love it.',
     name: 'Anna Lindqvist',
     role: 'Security Engineer, Spektra Cloud',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150&h=150',
   },
 ];
 
@@ -161,12 +164,19 @@ export default function SocialProof() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-200 hover:border-[color-mix(in_srgb,var(--vault-blue)_25%,var(--border))]"
+            className="flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card-2)] p-6 backdrop-blur-sm transition-all duration-200 hover:border-[color-mix(in_srgb,var(--vault-blue)_25%,var(--border))]"
           >
-            <p className="text-sm leading-relaxed text-[var(--muted)] italic">&ldquo;{t.quote}&rdquo;</p>
-            <div className="mt-4 border-t border-[var(--border)] pt-4">
-              <div className="text-sm font-semibold text-[var(--fg)]">{t.name}</div>
-              <div className="text-xs text-[var(--muted-2)]">{t.role}</div>
+            <p className="flex-1 text-sm leading-relaxed text-[var(--muted)] italic">&ldquo;{t.quote}&rdquo;</p>
+            <div className="mt-6 flex items-center gap-4 border-t border-[var(--border)] pt-4">
+              <img 
+                src={t.avatar} 
+                alt={t.name}
+                className="h-10 w-10 rounded-full border border-[var(--border)] object-cover grayscale transition-all hover:grayscale-0"
+              />
+              <div>
+                <div className="text-sm font-semibold text-[var(--fg)]">{t.name}</div>
+                <div className="text-xs text-[var(--muted-2)]">{t.role}</div>
+              </div>
             </div>
           </motion.div>
         ))}

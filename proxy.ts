@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // Public routes: only landing + auth pages.
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)']);
+const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/internal(.*)']);
 
 // ── Rate limiting for /api/chat: 20 req/min per IP ──
 const chatRateLimit = new Map<string, { count: number; resetTime: number }>();
