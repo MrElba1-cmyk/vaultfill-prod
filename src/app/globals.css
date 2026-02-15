@@ -553,3 +553,155 @@ html.light .mesh-emerald {
     @apply bg-background text-foreground;
   }
 }
+
+/*
+  ---break---
+  VAULTFILL CINEMATIC TOKENS
+  Spacing: 8,16,32,64,128
+  Type: 56,32,18
+  Radius: 24,48
+  Shadow: deep
+  Motion: 1000/1500ms | easeOutSine
+*/
+:root {
+  --vault-spacing-8: 8px;
+  --vault-spacing-16: 16px;
+  --vault-spacing-32: 32px;
+  --vault-spacing-64: 64px;
+  --vault-spacing-128: 128px;
+
+  --vault-t-56: 56px;
+  --vault-t-32: 32px;
+  --vault-t-18: 18px;
+
+  --vault-radius-24: 24px;
+  --vault-radius-48: 48px;
+
+  --vault-shadow-deep: 0 20px 40px rgba(0,0,0,.4);
+
+  --vault-motion-fast: 180ms;
+  --vault-motion-slow: 1000ms;
+  --vault-motion-slower: 1500ms;
+  --vault-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Cinematic Hero Section */
+.vault-cinematic-hero {
+  position: relative;
+  height: 72vh;
+  min-height: 500px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vault-video-bg {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 0;
+}
+
+.vault-video-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+}
+
+.vault-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  padding: var(--vault-spacing-32);
+  text-align: center;
+}
+
+/* Clip-path reveal animation */
+@keyframes vault-clip-reveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.vault-reveal {
+  animation: vault-clip-reveal var(--vault-motion-slower) var(--vault-ease-out) forwards;
+}
+
+/* Parallax Section */
+.vault-parallax-section {
+  position: relative;
+  will-change: transform;
+  overflow: hidden;
+}
+
+/* Scroll Reveal */
+@keyframes vault-reveal-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vault-scroll-reveal {
+  opacity: 0;
+  animation: vault-reveal-up var(--vault-motion-slow) var(--vault-ease-out) forwards;
+}
+
+.vault-scroll-reveal.visible {
+  opacity: 1;
+}
+
+/* Sticky Nav */
+.vault-sticky-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: var(--vault-spacing-16) var(--vault-spacing-32);
+  transition: all var(--vault-motion-fast) var(--vault-ease-out);
+  backdrop-filter: blur(0px);
+  border-bottom: 1px solid transparent;
+}
+
+.vault-sticky-nav.scrolled {
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.6);
+}
+
+/* Snap-lift hover */
+.vault-hover-lift {
+  transition: transform var(--vault-motion-fast) var(--vault-ease-out),
+              box-shadow var(--vault-motion-fast) var(--vault-ease-out);
+}
+
+.vault-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--vault-shadow-deep);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .vault-reveal,
+  .vault-scroll-reveal,
+  .vault-hover-lift {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .vault-sticky-nav.scrolled {
+    backdrop-filter: none;
+  }
+}
