@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- The VaultFill Logo
+       Minimalist triangle split into 3 segments
+       Flat vector, zero gradients, dark-mode optimized
+       
+       Color System:
+       - Cyan #00D4FF → Risk (left)
+       - Indigo #6366F1 → Compliance (right)  
+       - Silver #CBD5E1 → Governance (base)
+       
+       Triangle vertices: top(256,56) bottom-left(96,424) bottom-right(416,424)
+       Split by horizontal line at y=260 and vertical center at x=256
+       3px gaps between segments -->
+
+  <!-- Left Segment — RISK -->
+  <polygon points="256,60 258,258 98,420" fill="#00D4FF"/>
+
+  <!-- Right Segment — COMPLIANCE -->
+  <polygon points="256,60 254,258 414,420" fill="#6366F1"/>
+
+  <!-- Bottom Segment — GOVERNANCE -->
+  <polygon points="100,424 412,424 254,262 258,262" fill="#CBD5E1"/>
+</svg>

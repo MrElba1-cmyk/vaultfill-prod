@@ -1,6 +1,10 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+/* Your Emerald Mesh and other custom styles below */
 /*
   ---break---
 */
@@ -82,14 +86,18 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
-html { color-scheme: dark; }
+html {
+  color-scheme: dark;
+}
 
 html.light {
   color-scheme: light;
 
-  --vault-blue: #0891B2; /* cyan-600 for WCAG AA */
+  --vault-blue: #0891B2;
+  /* cyan-600 for WCAG AA */
   --trust: #4F46E5;
-  --apex-emerald: #059669; /* emerald-600 for WCAG AA (4.5:1+) */
+  --apex-emerald: #059669;
+  /* emerald-600 for WCAG AA (4.5:1+) */
 
   --bg: #F1F5F9;
   --fg: #0F172A;
@@ -107,11 +115,17 @@ html.light {
   --glow-emerald: rgba(52, 211, 153, 0.05);
 }
 
-html.dark { color-scheme: dark; }
+html.dark {
+  color-scheme: dark;
+}
 
 /* Smooth theme transition */
 html:not([data-theme-transition="false"]) {
-  &, *, *::before, *::after {
+
+  &,
+  *,
+  *::before,
+  *::after {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease, box-shadow 0.3s ease;
   }
 }
@@ -151,19 +165,45 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-html.light body { font-weight: 500; }
-html.dark body { font-weight: 450; }
+html.light body {
+  font-weight: 500;
+}
+
+html.dark body {
+  font-weight: 450;
+}
 
 /* Visibility hacks for dark/light contrast */
-html.dark .text-muted { color: #94a3b8; }
-html.light .marquee-container span { color: #475569 !important; opacity: 0.8; }
-html.light .marquee-container span:hover { color: #0891b2 !important; opacity: 1; }
+html.dark .text-muted {
+  color: #94a3b8;
+}
+
+html.light .marquee-container span {
+  color: #475569 !important;
+  opacity: 0.8;
+}
+
+html.light .marquee-container span:hover {
+  color: #0891b2 !important;
+  opacity: 1;
+}
 
 /* Force readable text on light theme for demo pages */
-html.light section h2 { color: #0f172a !important; }
-html.light table thead tr th { color: #475569 !important; }
-html.light table tbody tr td { color: #1e293b !important; }
-html.light .bento-kicker { color: #0891b2 !important; }
+html.light section h2 {
+  color: #0f172a !important;
+}
+
+html.light table thead tr th {
+  color: #475569 !important;
+}
+
+html.light table tbody tr td {
+  color: #1e293b !important;
+}
+
+html.light .bento-kicker {
+  color: #0891b2 !important;
+}
 
 /* Apex gradient text — cyan to indigo */
 .text-gradient-apex {
@@ -188,8 +228,8 @@ html.light .text-gradient-blue {
   background: rgba(10, 15, 26, 0.65);
   backdrop-filter: blur(40px) saturate(1.8);
   -webkit-backdrop-filter: blur(40px) saturate(1.8);
-  box-shadow: 
-    0 20px 80px rgba(0, 0, 0, 0.7), 
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.7),
     0 0 50px rgba(52, 211, 153, 0.05),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
@@ -203,7 +243,7 @@ html.light .glass-card {
 /* Emerald Stealth Mesh Gradient */
 .mesh-emerald {
   background-color: #03060B;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, hsla(161, 98%, 15%, 0.15) 0px, transparent 50%),
     radial-gradient(at 50% 0%, hsla(188, 94%, 20%, 0.1) 0px, transparent 50%),
     radial-gradient(at 100% 0%, hsla(243, 75%, 15%, 0.15) 0px, transparent 50%),
@@ -212,7 +252,7 @@ html.light .glass-card {
 
 html.light .mesh-emerald {
   background-color: #F8FAFC;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, hsla(161, 98%, 90%, 0.4) 0px, transparent 50%),
     radial-gradient(at 50% 0%, hsla(188, 94%, 92%, 0.3) 0px, transparent 50%),
     radial-gradient(at 100% 0%, hsla(243, 75%, 94%, 0.3) 0px, transparent 50%);
@@ -236,13 +276,14 @@ html.light .mesh-emerald {
   .subpixel-border {
     position: relative;
   }
+
   .subpixel-border::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.05));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.05));
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
@@ -309,23 +350,44 @@ html.light .mesh-emerald {
   mix-blend-mode: screen;
 }
 
-.group:hover .vault-power { opacity: 1; }
+.group:hover .vault-power {
+  opacity: 1;
+}
 
 /* Infinite scroll ticker */
 @keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* Pulsing shield keyframes */
 @keyframes shield-pulse {
-  0%, 100% { box-shadow: 0 0 16px rgba(0, 212, 255, 0.25), 0 0 40px rgba(0, 212, 255, 0.08); }
-  50% { box-shadow: 0 0 24px rgba(0, 212, 255, 0.45), 0 0 60px rgba(99, 102, 241, 0.18); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.25), 0 0 40px rgba(0, 212, 255, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.45), 0 0 60px rgba(99, 102, 241, 0.18);
+  }
 }
 
 @keyframes shield-ring {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 
 /* LivePreview layout-shift prevention */
@@ -347,11 +409,13 @@ html.light .mesh-emerald {
     padding: 1.25rem;
     border-radius: 1.25rem;
   }
+
   .bento-icon {
     height: 38px;
     width: 38px;
     border-radius: 12px;
   }
+
   .bento-kicker {
     font-size: 10px;
     letter-spacing: 0.14em;
@@ -360,23 +424,38 @@ html.light .mesh-emerald {
 
 /* Touch targets */
 @media (pointer: coarse) {
-  button, a, select, [role="button"] {
+
+  button,
+  a,
+  select,
+  [role="button"] {
     min-height: 44px;
   }
+
   select {
     min-height: 48px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .bento-card, .vault-power { transition: none; }
-  .bento-card:hover { transform: none; }
+
+  .bento-card,
+  .vault-power {
+    transition: none;
+  }
+
+  .bento-card:hover {
+    transform: none;
+  }
 }
 
 /* Phase 3 infra: fading divider line (emerald center, transparent edges) */
@@ -386,6 +465,7 @@ html.light .mesh-emerald {
   background: linear-gradient(to right, transparent, #10b981, transparent);
   opacity: 0.45;
 }
+
 /*
   ---break---
 */
@@ -423,6 +503,7 @@ html.light .mesh-emerald {
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 /*
   ---break---
 */
@@ -459,6 +540,7 @@ html.light .mesh-emerald {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
 /*
   ---break---
 */
@@ -466,6 +548,7 @@ html.light .mesh-emerald {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
