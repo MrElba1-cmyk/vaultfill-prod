@@ -4,12 +4,14 @@ interface ParallaxSectionProps {
   children: ReactNode;
   offset?: number; // max parallax offset in % of viewport
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const ParallaxSection: React.FC<ParallaxSectionProps> = ({
   children,
   offset = 5,
-  className = ''
+  className = '',
+  style
 }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -56,6 +58,7 @@ export const ParallaxSection: React.FC<ParallaxSectionProps> = ({
     <section
       ref={sectionRef}
       className={`vault-parallax-section ${className}`}
+      style={style}
     >
       <div className={`vault-scroll-reveal ${isRevealed ? 'visible' : ''}`}>
         {children}
