@@ -2,18 +2,34 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export const FinalCTA: React.FC = () => {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section className="py-24 px-6">
       <div className="max-w-[800px] mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4" style={{ color: 'var(--apple-text)' }}>
-          Ready to get audit-ready?
-        </h2>
-        <p className="text-lg mb-8" style={{ color: 'var(--apple-text-secondary)' }}>
-          Join thousands of companies who've simplified their compliance journey.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <motion.div
+          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4" style={{ color: 'var(--apple-text)' }}>
+            Ready to get audit-ready?
+          </h2>
+          <p className="text-lg mb-8" style={{ color: 'var(--apple-text-secondary)' }}>
+            Join thousands of companies who've simplified their compliance journey.
+          </p>
+        </motion.div>
+        <motion.div
+          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
           <Link
             href="/demo"
             className="inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-full transition-all hover:scale-105"
@@ -28,10 +44,17 @@ export const FinalCTA: React.FC = () => {
           >
             Talk to sales
           </Link>
-        </div>
-        <p className="mt-6 text-sm" style={{ color: 'var(--apple-text-secondary)' }}>
+        </motion.div>
+        <motion.p 
+          initial={reduceMotion ? undefined : { opacity: 0 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-6 text-sm" 
+          style={{ color: 'var(--apple-text-secondary)' }}
+        >
           No credit card required • 14-day free trial • Cancel anytime
-        </p>
+        </motion.p>
       </div>
     </section>
   );

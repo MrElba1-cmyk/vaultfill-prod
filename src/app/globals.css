@@ -790,3 +790,132 @@ html {
     transform: none;
   }
 }
+
+/* 
+  ---break---
+  APPLE-ISH DESIGN TOKENS
+  Premium SaaS aesthetic (Vanta-inspired)
+*/
+:root {
+  /* Apple palette */
+  --apple-bg: #F5F5F7;
+  --apple-surface: #FFFFFF;
+  --apple-text: #1D1D1F;
+  --apple-text-muted: #86868B;
+  --apple-primary: #0071E3;
+  --apple-primary-hover: #0077ED;
+  --apple-secondary: #2C2C2E;
+  --apple-accent: #FF9500;
+  --apple-gradient1: #5E5CE6;
+  --apple-gradient2: #BF5AF2;
+  --apple-border: #E5E5EA;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+/* Apple-ish button */
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.apple-btn-primary {
+  background: var(--apple-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.apple-btn-primary:hover {
+  background: var(--apple-primary-hover);
+  transform: scale(1.02);
+}
+
+.apple-btn-secondary {
+  background: var(--apple-surface);
+  color: var(--apple-text);
+  border: 1px solid var(--apple-border);
+}
+
+.apple-btn-secondary:hover {
+  background: #f5f5f7;
+}
+
+/* Apple-ish card */
+.apple-card {
+  background: var(--apple-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  border: 1px solid var(--apple-border);
+}
+
+/* Apple section */
+.apple-section {
+  padding: 4rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Parallax (capped, respects reduced motion) */
+.parallax-section {
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parallax-section {
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Simple fade-up animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
