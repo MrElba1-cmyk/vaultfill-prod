@@ -705,3 +705,88 @@ html.light .mesh-emerald {
     backdrop-filter: none;
   }
 }
+/* 
+  ---break---
+  APPLE/VANTA STYLE TOKENS
+  Bright, minimal, premium SaaS aesthetic
+*/
+:root {
+  /* Container */
+  --apple-max-w: 1200px;
+  --apple-radius-sm: 8px;
+  --apple-radius-md: 12px;
+  --apple-radius-lg: 24px;
+  --apple-radius-xl: 40px;
+  
+  /* Shadows - soft and subtle */
+  --apple-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --apple-shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --apple-shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+  --apple-shadow-xl: 0 24px 60px rgba(0,0,0,0.12);
+  
+  /* Button styles */
+  --btn-padding-y: 12px;
+  --btn-padding-x: 24px;
+  --btn-radius: 100px;
+  --btn-font-weight: 500;
+  
+  /* Gradients - subtle wash */
+  --gradient-wash: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(247,248,250,0.5) 100%);
+}
+
+/* Light theme override for bright aesthetic */
+html {
+  --apple-bg: #ffffff;
+  --apple-bg-secondary: #f8f9fb;
+  --apple-text: #1d1d1f;
+  --apple-text-secondary: #6e6e73;
+  --apple-border: rgba(0,0,0,0.08);
+  --apple-accent: #0071e3;
+  --apple-accent-hover: #0077ed;
+}
+
+/* Animation tokens */
+@keyframes apple-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes apple-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes apple-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.apple-animate-fade-up {
+  animation: apple-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.apple-animate-fade-in {
+  animation: apple-fade-in 0.4s ease-out forwards;
+}
+
+.apple-animate-scale-in {
+  animation: apple-scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .apple-animate-fade-up,
+  .apple-animate-fade-in,
+  .apple-animate-scale-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
