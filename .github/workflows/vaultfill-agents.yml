@@ -2,10 +2,10 @@ name: VaultFill Autonomous Agents
 
 on:
   schedule:
-    - cron: '0 14 * * 1-5' # 8:00 AM CST (Scout)
-    - cron: '15 14 * * 1-5' # 8:15 AM CST (Closer)
-    - cron: '30 14 * * 1-5' # 8:30 AM CST (Transmission)
-  workflow_dispatch: # Permits manual UI override
+    - cron: '0 14 * * 1-5' 
+    - cron: '15 14 * * 1-5' 
+    - cron: '30 14 * * 1-5' 
+  workflow_dispatch: 
 
 jobs:
   execute-agents:
