@@ -1,0 +1,46 @@
+name: VaultFill Autonomous Agents
+
+on:
+  schedule:
+    - cron: '0 14 * * 1-5' # 8:00 AM CST (Scout)
+    - cron: '15 14 * * 1-5' # 8:15 AM CST (Closer)
+    - cron: '30 14 * * 1-5' # 8:30 AM CST (Transmission)
+  workflow_dispatch: # Permits manual UI override
+
+jobs:
+  execute-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install System Dependencies
+        run: npm install
+
+      - name: Execute Scout Agent
+        if: github.event.schedule == '0 14 * * 1-5' || github.event_name == 'workflow_dispatch'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/scout-leads.ts
+
+      - name: Execute Closer Agent
+        if: github.event.schedule == '15 14 * * 1-5' || github.event_name == 'workflow_dispatch'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx tsx scripts/outreach-agent.ts
+
+      - name: Execute Transmission Agent
+        if: github.event.schedule == '30 14 * * 1-5' || github.event_name == 'workflow_dispatch'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: npx tsx scripts/transmission-agent.ts
