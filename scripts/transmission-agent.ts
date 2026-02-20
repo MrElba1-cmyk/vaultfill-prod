@@ -13,8 +13,8 @@ if (!sendgridKey) {
 sgMail.setApiKey(sendgridKey);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const VERIFIED_SENDER = 'abdul@[your-verified-domain.com]'; 
-const DESTINATION_EMAIL = 'abdul@[your-verified-domain.com]';
+const VERIFIED_SENDER = 'contact@vaultfill.com'; 
+const DESTINATION_EMAIL = 'contact@vaultfill.com';
 
 async function runLiveTransmission() {
   console.log("Initiating Transmission Agent (Live SendGrid Routing)...");
